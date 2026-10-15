@@ -1,0 +1,6 @@
+Save/relaunch/animation/failure checks passed
+Home leaderboard entry/return/save isolation checks passed
+Small-palace saves and 10 Hz ranking idle rendering passed
+Old revival metadata does not invalidate a garden save
+Welcome energy, truthful saving status and visible ranking feedback passed
+PASS: daily share transitions, counted goals, fifth-chapter reward, visibility persistence and compact layout

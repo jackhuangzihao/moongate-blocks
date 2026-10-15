@@ -1,0 +1,30 @@
+方寸九宫 · 统计配置与验收（2026-10-04）
+
+代码侧完成情况
+保留已有 wx.reportEvent 上报，新增 mechanic_guide、result_action。每日专属题用 puzzle_id 与 date 区分，level_id 为 0，不冒充章节编号。统计失败不阻断游戏。模拟微信 API 已验证这些事件与字段被调用；这不等于微信后台已接收。
+
+本次后台状态
+尝试读取微信公众平台时，浏览器站点安全策略拒绝访问 mp.weixin.qq.com。未读取、修改后台配置，也未验证实际数据接收。请在已登录的微信公众平台自定义分析事件管理中对照下列清单检查。已有同名事件沿用，不重复新建。
+
+事件与字段
+session_start：mode 文本，level_id 数值，pieces 数值，cleared 数值，entry 文本(new/resume)，每日另带 date 文本、puzzle_id 文本。
+session_exit：上述公共字段 + reason 文本(home/restart)。
+session_pause：上述公共字段 + reason 文本(background)。后台暂停不等同永久流失。
+first_place / first_clear / first_lucky：上述公共字段；各事件每个本地安装首次一次。清理微信本地数据后会重置，不是服务端唯一用户标识。
+level_result / invite_result：level_id 数值，result 文本(win/fail)，steps 数值，stars 数值，fails 数值。
+daily_result：以上结果字段 + date 文本，puzzle_id 文本；专属题 level_id=0，puzzle_id=-1 到 -28。
+garden_result：map 文本，score 数值，pieces 数值。
+hint_used：上述公共字段 + source 文本(free/video)，undo_steps 数值。
+mechanic_guide：上述公共字段 + mechanic 文本(flowers/ice/stones/area/cross)，action 文本(show/skip/placed)。
+result_action：上述公共字段 + action 文本(retry/continue/home)，stars 数值。
+公共 mode：easy/medium/hard/long/courtyard 或 challenge/daily/invite；以 js/config.js 实际地图 id 为准。cleared 表示当前对局历史已有区域消除，撤回后也会随历史回退。
+
+真机验收建议
+1. 新安装体验首次落子/消除，确认 first_place、first_clear 各出现一次。
+2. 完成章节关，点再挑战一次，确认 level_result 与 result_action(action=retry)。
+3. 首次进入第四章，跳过引导；重启后同一机制不再重复出现，mechanic_guide 可区分展示与跳过。
+4. 2026-10-05起完成每日专属题，确认 daily_result 带date、负puzzle_id、level_id=0；不出现同次 level_result。
+5. 中途回首页/切后台，分别验证 session_exit/session_pause；不要把切后台立即当成流失。
+
+观察重点
+对比进入、首次消除、通关、重试；按关卡看失败和退出；按日期看每日精选回访。次日留存采用平台实际用户留存报表，不用本地累计印记代替。没有后台实收数据前，不宣称留存率提高。

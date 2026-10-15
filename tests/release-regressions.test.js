@@ -1,0 +1,35 @@
+const assert=require('assert');
+const {boot,clone}=require('./helpers/game-harness');
+const C=require('../js/challenge/challenges'),K=require('../js/progression/collection');
+// Real daily result → daily landing → home → next-day landing must not reuse yesterday's card.
+const app=boot({}, {clock:{value:Date.parse('2026-10-05T15:59:00Z')}});
+app.run('openDaily();startDaily()');app.complete();
+assert.ok(app.run('sharing.resultCard(state).query').includes('daily=2026-10-05'));
+app.tap(app.run('getGameOverActions(layout,state).restart'));
+assert.equal(app.run('sharing.resultCard(state)'),null);
+app.tap(app.run('getBackButton(layout)'));
+assert.equal(app.run('state.screen'),'menu');assert.equal(app.run('sharing.resultCard(state)'),null);
+app.clock.value=Date.parse('2026-10-06T04:00:00Z');app.handlers.Show({});
+app.tap(app.run('getHomeActions(layout).daily'));
+assert.ok(app.run('(sharing.resultCard(state)||sharing.menuCard(state)).query').includes('daily=2026-10-06'));
+// Progress counts are actual chapter accomplishments, never stars earned in daily/invited games.
+const stars=Array(60).fill(3);stars[47]=0;stars[59]=0;
+const partial=boot({[C.KEY]:{version:1,stars,chapter:4}},{size:{w:320,h:568}});
+assert.deepStrictEqual(clone(partial.run('state.collection.chapterCounts')),{arbour:11,plaque:47,keyCharm:11});
+assert.ok(!partial.run('state.ownedDecor').includes('keyCharm'));
+partial.run("collection.setTarget(state.collection,'keyCharm',0);openCollectionTarget()");
+assert.equal(partial.run('state.levelChapter'),4);
+partial.run('startChallenge(59);dismissMechanicGuide("test")');partial.complete();
+assert.ok(partial.run('state.ownedDecor').includes('keyCharm'));
+const reboot=boot(partial.store,{size:{w:320,h:568}});
+assert.ok(reboot.run('state.ownedDecor').includes('keyCharm'));
+reboot.run("openCollection();state.collectionTab='memorial'");
+assert.ok(reboot.draw().some(t=>t.text==='钥匙挂饰'));
+const rects=clone(reboot.run("getCollectionActions(layout,'memorial')"));
+for(const r of Object.values(rects))assert.ok(r.y+r.height<=reboot.run('layout.height-layout.safeBottom-35'),'cards stay above footer');
+reboot.tap(rects.keyCharm);assert.ok(!reboot.run('state.decor').includes('keyCharm'));
+assert.ok(!boot(reboot.store).run('state.decor').includes('keyCharm'));
+const legacy=K.normalize({version:1,achievements:['plaque','arbour']});
+assert.ok(K.unlocked(legacy,0).includes('plaque'),'original awards survive migration without chapter records');
+for(const bad of [-1,13,NaN,'12'])assert.equal(K.normalize({version:1,chapterCounts:{keyCharm:bad}}).chapterCounts,undefined);
+console.log('PASS: daily share transitions, counted goals, fifth-chapter reward, visibility persistence and compact layout');

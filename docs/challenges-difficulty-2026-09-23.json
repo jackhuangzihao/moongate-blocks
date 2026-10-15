@@ -1,0 +1,330 @@
+{
+  "games": 7200,
+  "moves": 75343,
+  "levels": [
+    {
+      "id": 1,
+      "chapter": 1,
+      "title": "初见",
+      "referenceMoves": 1,
+      "limit": 4,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 2,
+      "chapter": 1,
+      "title": "听竹",
+      "referenceMoves": 1,
+      "limit": 4,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 3,
+      "chapter": 1,
+      "title": "方寸",
+      "referenceMoves": 1,
+      "limit": 4,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 4,
+      "chapter": 1,
+      "title": "双晴",
+      "referenceMoves": 3,
+      "limit": 6,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 5,
+      "chapter": 1,
+      "title": "石径",
+      "referenceMoves": 4,
+      "limit": 7,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 6,
+      "chapter": 1,
+      "title": "转角",
+      "referenceMoves": 5,
+      "limit": 8,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 7,
+      "chapter": 1,
+      "title": "相逢",
+      "referenceMoves": 6,
+      "limit": 9,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 8,
+      "chapter": 1,
+      "title": "三叠",
+      "referenceMoves": 7,
+      "limit": 10,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 9,
+      "chapter": 1,
+      "title": "回望",
+      "referenceMoves": 8,
+      "limit": 11,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 10,
+      "chapter": 1,
+      "title": "竹影",
+      "referenceMoves": 9,
+      "limit": 12,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 11,
+      "chapter": 1,
+      "title": "四时",
+      "referenceMoves": 8,
+      "limit": 11,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 12,
+      "chapter": 1,
+      "title": "满庭",
+      "referenceMoves": 8,
+      "limit": 11,
+      "ice": 0,
+      "barriers": 0
+    },
+    {
+      "id": 13,
+      "chapter": 2,
+      "title": "初霜",
+      "referenceMoves": 4,
+      "limit": 7,
+      "ice": 6,
+      "barriers": 0
+    },
+    {
+      "id": 14,
+      "chapter": 2,
+      "title": "融雪",
+      "referenceMoves": 6,
+      "limit": 9,
+      "ice": 4,
+      "barriers": 0
+    },
+    {
+      "id": 15,
+      "chapter": 2,
+      "title": "双寒",
+      "referenceMoves": 10,
+      "limit": 13,
+      "ice": 2,
+      "barriers": 0
+    },
+    {
+      "id": 16,
+      "chapter": 2,
+      "title": "霜叶",
+      "referenceMoves": 12,
+      "limit": 15,
+      "ice": 3,
+      "barriers": 0
+    },
+    {
+      "id": 17,
+      "chapter": 2,
+      "title": "雪阶",
+      "referenceMoves": 12,
+      "limit": 15,
+      "ice": 2,
+      "barriers": 0
+    },
+    {
+      "id": 18,
+      "chapter": 2,
+      "title": "冷泉",
+      "referenceMoves": 9,
+      "limit": 12,
+      "ice": 3,
+      "barriers": 0
+    },
+    {
+      "id": 19,
+      "chapter": 2,
+      "title": "映月",
+      "referenceMoves": 10,
+      "limit": 13,
+      "ice": 2,
+      "barriers": 0
+    },
+    {
+      "id": 20,
+      "chapter": 2,
+      "title": "雪桥",
+      "referenceMoves": 8,
+      "limit": 11,
+      "ice": 3,
+      "barriers": 0
+    },
+    {
+      "id": 21,
+      "chapter": 2,
+      "title": "凝露",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 2,
+      "barriers": 0
+    },
+    {
+      "id": 22,
+      "chapter": 2,
+      "title": "寒窗",
+      "referenceMoves": 15,
+      "limit": 18,
+      "ice": 4,
+      "barriers": 0
+    },
+    {
+      "id": 23,
+      "chapter": 2,
+      "title": "回暖",
+      "referenceMoves": 12,
+      "limit": 15,
+      "ice": 3,
+      "barriers": 0
+    },
+    {
+      "id": 24,
+      "chapter": 2,
+      "title": "雪尽",
+      "referenceMoves": 15,
+      "limit": 18,
+      "ice": 4,
+      "barriers": 0
+    },
+    {
+      "id": 25,
+      "chapter": 3,
+      "title": "入曲",
+      "referenceMoves": 9,
+      "limit": 12,
+      "ice": 1,
+      "barriers": 16
+    },
+    {
+      "id": 26,
+      "chapter": 3,
+      "title": "窄门",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 2,
+      "barriers": 20
+    },
+    {
+      "id": 27,
+      "chapter": 3,
+      "title": "石桥",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 1,
+      "barriers": 13
+    },
+    {
+      "id": 28,
+      "chapter": 3,
+      "title": "绕山",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 3,
+      "barriers": 16
+    },
+    {
+      "id": 29,
+      "chapter": 3,
+      "title": "留白",
+      "referenceMoves": 13,
+      "limit": 16,
+      "ice": 3,
+      "barriers": 16
+    },
+    {
+      "id": 30,
+      "chapter": 3,
+      "title": "错落",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 5,
+      "barriers": 12
+    },
+    {
+      "id": 31,
+      "chapter": 3,
+      "title": "叠影",
+      "referenceMoves": 10,
+      "limit": 13,
+      "ice": 3,
+      "barriers": 19
+    },
+    {
+      "id": 32,
+      "chapter": 3,
+      "title": "回廊",
+      "referenceMoves": 10,
+      "limit": 13,
+      "ice": 2,
+      "barriers": 13
+    },
+    {
+      "id": 33,
+      "chapter": 3,
+      "title": "望岚",
+      "referenceMoves": 11,
+      "limit": 14,
+      "ice": 4,
+      "barriers": 14
+    },
+    {
+      "id": 34,
+      "chapter": 3,
+      "title": "归径",
+      "referenceMoves": 16,
+      "limit": 19,
+      "ice": 5,
+      "barriers": 10
+    },
+    {
+      "id": 35,
+      "chapter": 3,
+      "title": "静观",
+      "referenceMoves": 19,
+      "limit": 22,
+      "ice": 9,
+      "barriers": 14
+    },
+    {
+      "id": 36,
+      "chapter": 3,
+      "title": "庭深",
+      "referenceMoves": 16,
+      "limit": 19,
+      "ice": 6,
+      "barriers": 13
+    }
+  ]
+}

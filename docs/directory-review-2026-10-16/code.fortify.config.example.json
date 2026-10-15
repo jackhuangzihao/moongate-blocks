@@ -1,0 +1,62 @@
+{
+  "watermark": {
+    "name": "水印保护",
+    "files": [
+      "game.js",
+      "js/renderer.js"
+    ]
+  },
+  "obfuscation": {
+    "name": "代码混淆",
+    "tasks": [
+      {
+        "level": 2,
+        "files": [
+          "game.js",
+          "js/challenge/challenge-chapter-five.js",
+          "js/challenge/challenge-chapter-four.js",
+          "js/challenge/challenge-expansion.js",
+          "js/challenge/challenge-layouts.js",
+          "js/challenge/challenge-levels.js",
+          "js/challenge/challenges.js",
+          "js/config.js",
+          "js/daily/daily-levels.js",
+          "js/daily/daily-week-one.js",
+          "js/daily/daily-week-two.js",
+          "js/daily/daily.js",
+          "js/gravity/gravity-engine.js",
+          "js/gravity/gravity-mode.js",
+          "js/gravity/gravity-view.js",
+          "js/persistence/saves.js",
+          "js/persistence/storage.js",
+          "js/platform/analytics.js",
+          "js/platform/feedback.js",
+          "js/platform/leaderboard.js",
+          "js/platform/player-feedback.js",
+          "js/platform/rewarded-ad.js",
+          "js/platform/sharing.js",
+          "js/progression/basics.js",
+          "js/progression/collection.js",
+          "js/progression/goals.js",
+          "js/progression/mechanic-guide.js",
+          "js/renderer.js",
+          "js/rules/board.js",
+          "js/rules/garden-rules.js",
+          "js/rules/level-data.js",
+          "js/rules/shapes.js",
+          "js/rules/tools.js",
+          "js/rules/undo-budget.js",
+          "js/views/art.js",
+          "js/views/board-symbols.js",
+          "js/views/board-view.js",
+          "js/views/canvas-ui.js",
+          "js/views/drag-placement.js",
+          "js/views/layout.js",
+          "js/views/menu-view.js",
+          "js/views/panel-view.js",
+          "open-data/index.js"
+        ]
+      }
+    ]
+  }
+}

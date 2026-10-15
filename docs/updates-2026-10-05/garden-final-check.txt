@@ -1,0 +1,16 @@
+{"mode":"easy","strategy":"greedy","games":20,"steps":574,"score":3255,"regions":118,"energy":13,"chargedGames":1,"deliveredGames":1,"pendingAtDeath":0,"rescues":0,"maxSteps":71}
+{"mode":"medium","strategy":"greedy","games":20,"steps":544,"score":3420,"regions":146,"energy":8,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":0,"maxSteps":71}
+{"mode":"hard","strategy":"greedy","games":20,"steps":425,"score":2187,"regions":69,"energy":14,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":0,"maxSteps":38}
+{"mode":"long","strategy":"greedy","games":20,"steps":588,"score":4539,"regions":223,"energy":8,"chargedGames":1,"deliveredGames":1,"pendingAtDeath":0,"rescues":0,"maxSteps":68}
+{"mode":"courtyard","strategy":"greedy","games":20,"steps":587,"score":3390,"regions":126,"energy":18,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":0,"maxSteps":71}
+{"mode":"easy","strategy":"random","games":20,"steps":399,"score":1772,"regions":38,"energy":1,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":1,"maxSteps":32}
+{"mode":"medium","strategy":"random","games":20,"steps":319,"score":1419,"regions":26,"energy":2,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":0,"maxSteps":26}
+{"mode":"hard","strategy":"random","games":20,"steps":357,"score":1607,"regions":35,"energy":6,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":0,"maxSteps":38}
+{"mode":"long","strategy":"random","games":20,"steps":240,"score":1223,"regions":30,"energy":3,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":1,"maxSteps":23}
+{"mode":"courtyard","strategy":"random","games":20,"steps":357,"score":1599,"regions":30,"energy":5,"chargedGames":0,"deliveredGames":0,"pendingAtDeath":0,"rescues":2,"maxSteps":40}
+{"mode":"easy","strategy":"energy","games":20,"steps":1216,"score":7849,"regions":350,"energy":139,"chargedGames":12,"deliveredGames":12,"pendingAtDeath":1,"rescues":0,"maxSteps":116}
+{"mode":"medium","strategy":"energy","games":20,"steps":1188,"score":8720,"regions":430,"energy":104,"chargedGames":16,"deliveredGames":15,"pendingAtDeath":1,"rescues":0,"maxSteps":221}
+{"mode":"hard","strategy":"energy","games":20,"steps":808,"score":5023,"regions":219,"energy":108,"chargedGames":16,"deliveredGames":16,"pendingAtDeath":1,"rescues":0,"maxSteps":80}
+{"mode":"long","strategy":"energy","games":20,"steps":1527,"score":12570,"regions":678,"energy":128,"chargedGames":14,"deliveredGames":14,"pendingAtDeath":0,"rescues":1,"maxSteps":206}
+{"mode":"courtyard","strategy":"energy","games":20,"steps":891,"score":5537,"regions":242,"energy":119,"chargedGames":17,"deliveredGames":17,"pendingAtDeath":0,"rescues":1,"maxSteps":98}
+PASS {"games":300,"totalMoves":10020,"noise":{"invalid":590,"cancel":346,"background":214,"multitouch":121,"locked":5346}}

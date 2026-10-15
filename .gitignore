@@ -1,0 +1,34 @@
+# Machine settings and credentials stay local.
+.DS_Store
+/project.private.config.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+/node_modules/
+__pycache__/
+*.pyc
+
+# Release copies and backups remain on disk, outside source history.
+/docs/releases/
+*.zip
+*.tar.gz
+*.log
+
+# Rebuildable previews and review media.
+/docs/previews/playable.html
+/docs/previews/daily-week.html
+/docs/previews/gravity.html
+/docs/previews/garden-growth.html
+/docs/previews/audio-review/
+/docs/prototypes/gravity/lab.html
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.wav
+/docs/**/*.mp4
+/docs/**/*.mov
+!/docs/promotion-2026-09-27/*.png
+!/docs/promotion-2026-09-27/*.jpg
+!/docs/promotion-2026-09-27/*.jpeg

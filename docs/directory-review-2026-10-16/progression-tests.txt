@@ -1,0 +1,7 @@
+Garden collection: storage guard, clears with undo rollback, star unlocks, toasts, home entry and small-screen page passed
+Retention checks: first-clear tutorial/relaunch, ranked-score isolation, decor toggles, unique attempt failures and six objective migrations passed
+All three layouts retain independent saves after practice; ordinary placement does not prematurely dismiss teaching
+Collection target integration: real taps, cancel/replace, earning routes, home/results and completion acknowledgment passed
+Daily collection goals: updated progress, completed reward and save-warning priority passed
+PASS: practice solutions, skip/resume, save isolation, storage failure, invitations and one-time reward
+PASS: contextual rules, four screen sizes, non-mutating modal, actual collection goals, help card snapshots and isolated chapter/daily invitations

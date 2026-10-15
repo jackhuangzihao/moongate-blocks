@@ -1,0 +1,995 @@
+{
+  "version": 1,
+  "seeds": [
+    101,
+    102,
+    103,
+    104,
+    105,
+    106,
+    107,
+    108,
+    109,
+    110,
+    111,
+    112,
+    113,
+    114,
+    115,
+    116,
+    117,
+    118,
+    119,
+    120,
+    121,
+    122,
+    123,
+    124
+  ],
+  "meaning": "Bot wins are a reproducible regression signal, not estimated human win rates.",
+  "groups": {
+    "legacyDaily": [
+      {
+        "id": -29,
+        "chapter": -1,
+        "title": "借径听风",
+        "par": 6,
+        "limit": 9,
+        "choices": 59,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 17,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -30,
+        "chapter": -1,
+        "title": "留白成窗",
+        "par": 7,
+        "limit": 10,
+        "choices": 122,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -31,
+        "chapter": -1,
+        "title": "两岸花信",
+        "par": 6,
+        "limit": 9,
+        "choices": 99,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -32,
+        "chapter": -1,
+        "title": "交映成景",
+        "par": 7,
+        "limit": 10,
+        "choices": 103,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -33,
+        "chapter": -1,
+        "title": "双扉借景",
+        "par": 9,
+        "limit": 12,
+        "choices": 108,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -34,
+        "chapter": -1,
+        "title": "霜下花开",
+        "par": 8,
+        "limit": 11,
+        "choices": 97,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -35,
+        "chapter": -1,
+        "title": "周末归庭",
+        "par": 9,
+        "limit": 12,
+        "choices": 107,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      }
+    ],
+    "daily": [
+      {
+        "id": -36,
+        "chapter": -1,
+        "title": "松影交织",
+        "par": 9,
+        "limit": 12,
+        "choices": 41,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -37,
+        "chapter": -1,
+        "title": "霜径回声",
+        "par": 10,
+        "limit": 13,
+        "choices": 12,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -38,
+        "chapter": -1,
+        "title": "曲径借位",
+        "par": 10,
+        "limit": 13,
+        "choices": 12,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -39,
+        "chapter": -1,
+        "title": "花信相催",
+        "par": 9,
+        "limit": 12,
+        "choices": 45,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -40,
+        "chapter": -1,
+        "title": "扉后有路",
+        "par": 10,
+        "limit": 13,
+        "choices": 10,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -41,
+        "chapter": -1,
+        "title": "霜花同映",
+        "par": 9,
+        "limit": 12,
+        "choices": 15,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": -42,
+        "chapter": -1,
+        "title": "一庭合景",
+        "par": 10,
+        "limit": 13,
+        "choices": 20,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      }
+    ],
+    "chapterIntroductions": [
+      {
+        "id": 0,
+        "number": 1,
+        "chapter": 0,
+        "title": "初见",
+        "par": 1,
+        "limit": 4,
+        "choices": 192,
+        "immediate": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 1,
+        "number": 2,
+        "chapter": 0,
+        "title": "听竹",
+        "par": 1,
+        "limit": 4,
+        "choices": 192,
+        "immediate": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 2,
+        "number": 3,
+        "chapter": 0,
+        "title": "方寸",
+        "par": 1,
+        "limit": 4,
+        "choices": 191,
+        "immediate": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 12,
+        "number": 19,
+        "chapter": 1,
+        "title": "初霜",
+        "par": 4,
+        "limit": 8,
+        "choices": 107,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 24,
+        "number": 37,
+        "chapter": 2,
+        "title": "入曲",
+        "par": 9,
+        "limit": 13,
+        "choices": 98,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 36,
+        "number": 55,
+        "chapter": 3,
+        "title": "初蕊",
+        "par": 4,
+        "limit": 8,
+        "choices": 56,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 48,
+        "number": 73,
+        "chapter": 4,
+        "title": "启扉",
+        "par": 3,
+        "limit": 7,
+        "choices": 138,
+        "immediate": {
+          "wins": 3,
+          "threeStars": 2,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      }
+    ],
+    "chapterExpansion": [
+      {
+        "id": 60,
+        "number": 13,
+        "chapter": 0,
+        "title": "分枝",
+        "par": 5,
+        "limit": 10,
+        "choices": 53,
+        "immediate": {
+          "wins": 5,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 61,
+        "number": 14,
+        "chapter": 0,
+        "title": "相让",
+        "par": 5,
+        "limit": 10,
+        "choices": 37,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 62,
+        "number": 15,
+        "chapter": 0,
+        "title": "借地",
+        "par": 5,
+        "limit": 10,
+        "choices": 24,
+        "immediate": {
+          "wins": 10,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 63,
+        "number": 16,
+        "chapter": 0,
+        "title": "回环",
+        "par": 5,
+        "limit": 10,
+        "choices": 36,
+        "immediate": {
+          "wins": 9,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 24,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 64,
+        "number": 17,
+        "chapter": 0,
+        "title": "留径",
+        "par": 5,
+        "limit": 10,
+        "choices": 10,
+        "immediate": {
+          "wins": 18,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 24,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 65,
+        "number": 18,
+        "chapter": 0,
+        "title": "合庭",
+        "par": 7,
+        "limit": 12,
+        "choices": 22,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 66,
+        "number": 31,
+        "chapter": 1,
+        "title": "霜隙",
+        "par": 5,
+        "limit": 9,
+        "choices": 71,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 67,
+        "number": 32,
+        "chapter": 1,
+        "title": "雪痕",
+        "par": 5,
+        "limit": 9,
+        "choices": 48,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 68,
+        "number": 33,
+        "chapter": 1,
+        "title": "冰桥",
+        "par": 8,
+        "limit": 12,
+        "choices": 45,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 69,
+        "number": 34,
+        "chapter": 1,
+        "title": "双融",
+        "par": 9,
+        "limit": 13,
+        "choices": 30,
+        "immediate": {
+          "wins": 5,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 70,
+        "number": 35,
+        "chapter": 1,
+        "title": "融庭",
+        "par": 9,
+        "limit": 13,
+        "choices": 44,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 71,
+        "number": 36,
+        "chapter": 1,
+        "title": "回暖",
+        "par": 10,
+        "limit": 14,
+        "choices": 56,
+        "immediate": {
+          "wins": 3,
+          "threeStars": 2,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 72,
+        "number": 49,
+        "chapter": 2,
+        "title": "岔径",
+        "par": 5,
+        "limit": 9,
+        "choices": 23,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 73,
+        "number": 50,
+        "chapter": 2,
+        "title": "绕石",
+        "par": 6,
+        "limit": 10,
+        "choices": 40,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 74,
+        "number": 51,
+        "chapter": 2,
+        "title": "借角",
+        "par": 6,
+        "limit": 10,
+        "choices": 56,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 75,
+        "number": 52,
+        "chapter": 2,
+        "title": "错峰",
+        "par": 7,
+        "limit": 11,
+        "choices": 28,
+        "immediate": {
+          "wins": 3,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 76,
+        "number": 53,
+        "chapter": 2,
+        "title": "回转",
+        "par": 7,
+        "limit": 11,
+        "choices": 23,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 1,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 77,
+        "number": 54,
+        "chapter": 2,
+        "title": "通幽",
+        "par": 7,
+        "limit": 11,
+        "choices": 28,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 78,
+        "number": 67,
+        "chapter": 3,
+        "title": "花畔",
+        "par": 6,
+        "limit": 10,
+        "choices": 51,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 79,
+        "number": 68,
+        "chapter": 3,
+        "title": "双蕊",
+        "par": 6,
+        "limit": 10,
+        "choices": 62,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 80,
+        "number": 69,
+        "chapter": 3,
+        "title": "回香",
+        "par": 6,
+        "limit": 10,
+        "choices": 43,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 81,
+        "number": 70,
+        "chapter": 3,
+        "title": "留春",
+        "par": 7,
+        "limit": 11,
+        "choices": 9,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 82,
+        "number": 71,
+        "chapter": 3,
+        "title": "照影",
+        "par": 8,
+        "limit": 12,
+        "choices": 32,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 83,
+        "number": 72,
+        "chapter": 3,
+        "title": "满枝",
+        "par": 8,
+        "limit": 12,
+        "choices": 52,
+        "immediate": {
+          "wins": 2,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 84,
+        "number": 85,
+        "chapter": 4,
+        "title": "借钥",
+        "par": 6,
+        "limit": 10,
+        "choices": 61,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 85,
+        "number": 86,
+        "chapter": 4,
+        "title": "择门",
+        "par": 6,
+        "limit": 10,
+        "choices": 56,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 86,
+        "number": 87,
+        "chapter": 4,
+        "title": "回廊",
+        "par": 7,
+        "limit": 11,
+        "choices": 18,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 87,
+        "number": 88,
+        "chapter": 4,
+        "title": "换路",
+        "par": 7,
+        "limit": 11,
+        "choices": 46,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 88,
+        "number": 89,
+        "chapter": 4,
+        "title": "双景",
+        "par": 8,
+        "limit": 12,
+        "choices": 33,
+        "immediate": {
+          "wins": 1,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      },
+      {
+        "id": 89,
+        "number": 90,
+        "chapter": 4,
+        "title": "通庭",
+        "par": 8,
+        "limit": 12,
+        "choices": 35,
+        "immediate": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        },
+        "nearComplete": {
+          "wins": 0,
+          "threeStars": 0,
+          "attempts": 24
+        }
+      }
+    ]
+  }
+}

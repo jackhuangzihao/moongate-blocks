@@ -1,0 +1,1 @@
+PASS: 45 runtime/config files identical after normalizing only relative require paths; assets and open-data unchanged.

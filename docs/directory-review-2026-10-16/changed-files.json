@@ -1,0 +1,409 @@
+[
+  {
+    "path": "AGENTS.md",
+    "change": "updated"
+  },
+  {
+    "path": "docs/previews/daily-week.html",
+    "change": "updated"
+  },
+  {
+    "path": "docs/previews/garden-growth.html",
+    "change": "updated"
+  },
+  {
+    "path": "docs/previews/gravity.html",
+    "change": "updated"
+  },
+  {
+    "path": "docs/previews/playable.html",
+    "change": "updated"
+  },
+  {
+    "path": "docs/promotion-2026-09-27/build.cjs",
+    "change": "updated"
+  },
+  {
+    "path": "docs/prototypes/gravity/controller.js",
+    "change": "updated"
+  },
+  {
+    "path": "docs/prototypes/gravity/engine.js",
+    "change": "updated"
+  },
+  {
+    "path": "docs/prototypes/gravity/lab.html",
+    "change": "updated"
+  },
+  {
+    "path": "game.js",
+    "change": "updated"
+  },
+  {
+    "old": "js/analytics.js",
+    "new": "js/platform/analytics.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/art.js",
+    "new": "js/views/art.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/basics.js",
+    "new": "js/progression/basics.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/board-symbols.js",
+    "new": "js/views/board-symbols.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/board-view.js",
+    "new": "js/views/board-view.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/board.js",
+    "new": "js/rules/board.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/canvas-ui.js",
+    "new": "js/views/canvas-ui.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenge-chapter-five.js",
+    "new": "js/challenge/challenge-chapter-five.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenge-chapter-four.js",
+    "new": "js/challenge/challenge-chapter-four.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenge-expansion.js",
+    "new": "js/challenge/challenge-expansion.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenge-layouts.js",
+    "new": "js/challenge/challenge-layouts.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenge-levels.js",
+    "new": "js/challenge/challenge-levels.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/challenges.js",
+    "new": "js/challenge/challenges.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/collection.js",
+    "new": "js/progression/collection.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/daily-levels.js",
+    "new": "js/daily/daily-levels.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/daily-week-one.js",
+    "new": "js/daily/daily-week-one.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/daily-week-two.js",
+    "new": "js/daily/daily-week-two.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/daily.js",
+    "new": "js/daily/daily.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/drag-placement.js",
+    "new": "js/views/drag-placement.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/feedback.js",
+    "new": "js/platform/feedback.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/garden-rules.js",
+    "new": "js/rules/garden-rules.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/goals.js",
+    "new": "js/progression/goals.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/gravity-engine.js",
+    "new": "js/gravity/gravity-engine.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/gravity-mode.js",
+    "new": "js/gravity/gravity-mode.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/gravity-view.js",
+    "new": "js/gravity/gravity-view.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/layout.js",
+    "new": "js/views/layout.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/leaderboard.js",
+    "new": "js/platform/leaderboard.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/level-data.js",
+    "new": "js/rules/level-data.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/mechanic-guide.js",
+    "new": "js/progression/mechanic-guide.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/menu-view.js",
+    "new": "js/views/menu-view.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/panel-view.js",
+    "new": "js/views/panel-view.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/player-feedback.js",
+    "new": "js/platform/player-feedback.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "path": "js/renderer.js",
+    "change": "updated"
+  },
+  {
+    "old": "js/rewarded-ad.js",
+    "new": "js/platform/rewarded-ad.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/saves.js",
+    "new": "js/persistence/saves.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/shapes.js",
+    "new": "js/rules/shapes.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/sharing.js",
+    "new": "js/platform/sharing.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/storage.js",
+    "new": "js/persistence/storage.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/tools.js",
+    "new": "js/rules/tools.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "old": "js/undo-budget.js",
+    "new": "js/rules/undo-budget.js",
+    "change": "moved; imports updated where needed"
+  },
+  {
+    "path": "tests/basics.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/build-audio-review.py",
+    "change": "updated"
+  },
+  {
+    "path": "tests/build-gravity-preview.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/build-growth-preview.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/build-playable-preview.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/challenge-pacing.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/challenges.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/chapter-five.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/collection-target.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/collection.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/daily-integration.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/daily-levels.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/daily-week.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/daily.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/design/benchmark.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/design/evaluator.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/design/generator.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/design/gravity-benchmark.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/drag-placement.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/expansion.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/friend-benchmark-integration.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/game-feedback.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/garden-growth.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/garden-rules.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/goals-and-help.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/gravity-mode.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/gravity.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/helpers/game-harness.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/leaderboard.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/maps.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/onboarding.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/placement-preview.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/release-regressions.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/retired-gardens.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/saves.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/sharing.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/stress.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/tools.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/ui-actions.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/undo-budget.test.js",
+    "change": "updated"
+  },
+  {
+    "path": "tests/helpers/preview-bundle.js",
+    "change": "added"
+  },
+  {
+    "path": "tests/preview-bundle.test.js",
+    "change": "added"
+  }
+]

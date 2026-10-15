@@ -1,0 +1,45 @@
+开发维护
+
+入口
+- js/challenge-expansion.js：本次三十道闯关数据。
+- js/daily-week-two.js：本次七道每日题。
+- js/challenge-levels.js：原关卡与新关卡组合；chapterLevels/nextLevel 是导航唯一来源。
+- js/level-data.js：九行棋盘解析，0 空位、1 普通方块、2 永久障碍。钥匙/门/冰层/花圃单独定义。
+- tests/design/generator.js：离线生成候选（版本 1）。
+- tests/design/evaluator.js：使用真实引擎的有界搜索、两种贪心打法。
+- tests/design/benchmark.js：可复现自动打法报告。
+- tests/expansion.test.js：扩关迁移、候选复现、三星路线、短解、触控和日期兼容测试。
+
+操作
+node tests/design/generator.js flowers 82000 20
+生成候选写入 docs/difficulty-review/candidates-flowers-82000.json，已有同名文件时拒绝覆盖。
+profile 可选 intro / regions / ice / stones / flowers / gates / mixed。
+候选只是编辑素材；必须审核棋盘、参考路线与机关使用，调整目标及步数后再进入正式数据文件。
+同一生成版本、profile 和 seed 可复现棋盘、目标与发牌。改生成规则必须升级版本。
+有界搜索没有找到解，不等于证明无解；这些候选会被跳过。
+
+node tests/design/benchmark.js
+重新生成 benchmark.json。观察直观策略与综合题的差异，不能把机器人胜率当作真人胜率。
+
+node tests/run.js
+运行全部回归测试。核心覆盖：三星可达、旧存档、解锁、分享、日期、撤回、机关、触控、存储失败、屏幕布局。
+
+node tests/build-playable-preview.js
+刷新 docs/previews/playable.html（支持 ?lab=1 任意选关）和 daily-week.html（直接任选七道新版每日题）。浏览器预览进度与微信独立。
+
+稳定性约束
+1. LEVELS 数组内部 ID 只追加、不插入、不重排；章节显示顺序通过 chapterLevels 取得。
+2. 导航/显示不得用 id / 12、id + 1 推导章节或下一题。分享协议和分析事件仍用旧内部 ID，故保留协议里的 id + 1 编码。
+3. 更改已发布题的棋盘、发牌或目标时提高 rule；旧星级保留，进行中旧规则棋盘安全重开。
+4. 每日题仅追加，排期明确起始日期。保留旧版本同日期对应题的合法性，并按日期+题目+规则分别保存成绩。
+5. 生成器、搜索、评估、截图和测试都在开发电脑执行；tests/docs 已排除出微信游戏包。
+6. 新增数据应包含明确主题与三星见证路线；关卡总数、星数、滚动范围由实际章节列表计算。
+7. 选关几何统一由 renderer 的 getLevelViewport/getLevelActions 计算；触控区域与绘制裁剪共用视口。滚动偏移仅保留在内存，不改变存档。tests/level-scroll.test.js 覆盖手势归属、防误触、边界、后台恢复和待机。
+
+参考方法（未复制外部代码或素材）
+https://github.com/Phune23/match3-analyzer
+参考“用自动打法批量观察关卡”的方法；未采用其难度分数公式。
+https://github.com/AlliBalliBaba/Sokoban-Level-Generator
+参考生成后优化、以及障碍可能反而暴露解法的经验。
+https://www.scss.tcd.ie/Mads.Haahr/papers/de-kegel-2020-transactions.pdf
+区分生成、可解性验证与质量筛选；本项目保留最终固定数据，避免运行时生成改变关卡。

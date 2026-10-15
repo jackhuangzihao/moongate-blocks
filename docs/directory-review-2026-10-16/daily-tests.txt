@@ -1,0 +1,4 @@
+PASS: Beijing midnight/timezone stability, fixed authored daily puzzles, separate resume/stamps, 30-day history, corruption guards and storage retry
+PASS: old-rule best scores retained, permanent month stamps, calendar masks and repeated migration
+PASS: daily benchmark save/resume, date/rule binding, invalid optional values and legacy saves
+PASS: daily/invitation touch play, isolated progress, undo/restart/relaunch, Beijing rollover, share ingress and persistence retry
