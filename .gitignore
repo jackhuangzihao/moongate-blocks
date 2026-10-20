@@ -32,3 +32,6 @@ __pycache__/
 !/docs/promotion-2026-09-27/*.png
 !/docs/promotion-2026-09-27/*.jpg
 !/docs/promotion-2026-09-27/*.jpeg
+
+# README screenshots are part of the repository page.
+!/docs/readme/*.jpg
