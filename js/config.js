@@ -3,12 +3,18 @@ const COLORS = {
   // 原来背景 / 面板 / 空格三色明度差都在 4% 以内，整块糊成一片。
   background: '#EEEADD',
   panel: '#FAF8F0',
+  trayBackground: '#F6F3E9',
+  traySelected: '#E0E9DD',
   // 面板与背景的明度差仍然有限，靠一道细描边把棋盘边界钉死。
   boardEdge: '#CFC3A9',
   emptyCell: '#E3DDCC',
   energyEmptyCell: '#E9D49A',
   block: '#81A793',
   primaryButton: '#386551',
+  accent: '#386551',
+  onPrimary: '#FFFFFF',
+  surfaceMuted: '#F4EFE5',
+  surfaceWarm: '#EFE7DA',
   // 放不下 / 非法落点：柔和的砖红，彩度与整体一致。色盲玩家主要靠形状区分——
   // 非法落点画成空心描边格，放不下的托盘方块另有一道斜线。
   alert: '#A26765',

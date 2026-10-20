@@ -2,6 +2,8 @@ const assert = require('assert');
 const { boot, clone } = require('./helpers/game-harness');
 const feedback = require('../js/views/drag-placement');
 const view = require('../js/gravity/gravity-view');
+const boardView = require('../js/views/board-view');
+const {COLORS} = require('../js/config');
 
 function canvasRecorder() {
   const paints = [], stack = [];
@@ -76,4 +78,24 @@ assert.deepStrictEqual(feedback.position({ x: 65, y: 196 }, bounds, layout).targ
 assert.equal(feedback.position({ x: 79.9, y: 196 }, bounds, layout).target.col, 0);
 assert.equal(feedback.position({ x: 80.1, y: 196 }, bounds, layout).target.col, 1);
 assert.equal(feedback.position({ x: 500, y: 196 }, bounds, layout).target, null);
+// The selected tray is visual only: picking up/cancelling preserves the board and hit areas.
+for(const size of [{w:320,h:568},{w:390,h:844}])for(const chapter of [false,true]){
+  const app=boot({fangcunTutorialSeen:true},{size});
+  app.run(chapter?'startChallenge(12);state.mechanicGuide=null':'restartGame()');app.draw();
+  const l=app.run('layout'),board=clone(app.run('state.board'));
+  const slot=chapter?app.run('challenges.level(12).solution[0][0]'):0;
+  const point={clientX:l.horizontalPadding+l.traySlotWidth*(slot+.5),clientY:l.trayY,identifier:13};
+  app.handlers.TouchStart({touches:[point],changedTouches:[point]});
+  assert.equal(app.run('state.drag.trayIndex'),slot);
+  const selected=canvasRecorder();boardView.drawTray(selected.ctx,l,app.run('state'));
+  const pads=selected.paints.filter(p=>p.color===COLORS.traySelected);
+  assert.equal(pads.length,1);assert.ok(point.clientX>pads[0].x && point.clientX<pads[0].x+pads[0].width);
+  assert.deepStrictEqual(clone(app.run('state.board')),board);
+  app.handlers.TouchCancel({touches:[],changedTouches:[point]});
+  assert.equal(app.run('state.drag'),null);
+  const restored=canvasRecorder();boardView.drawTray(restored.ctx,l,app.run('state'));
+  assert.equal(restored.paints.filter(p=>p.color===COLORS.traySelected).length,0);
+  assert.equal(restored.paints.filter(p=>p.color===COLORS.trayBackground).length,3);
+  assert.deepStrictEqual(clone(app.run('state.board')),board);
+}
 console.log('PASS: shared drag anchoring, floating piece outside/inside board, tray removal, legal-only previews, highlights, cache and rejected releases');

@@ -39,7 +39,7 @@ function button(ctx,rect,label,primary=false,state=null,id='',fontSize=16) {
   rect = pressedRect(state, id, rect);
   ctx.fillStyle=primary?COLORS.primaryButton:COLORS.panel;
   roundedRect(ctx,rect.x,rect.y,rect.width,rect.height,16);ctx.fill();
-  text(ctx,label,rect.x+rect.width/2,rect.y+rect.height/2+6,fontSize,primary?'#FFFFFF':COLORS.text,'center','600');
+  text(ctx,label,rect.x+rect.width/2,rect.y+rect.height/2+6,fontSize,primary?COLORS.onPrimary:COLORS.text,'center','600');
 }
 
 function drawSettingsIcon(ctx, rect, color) {

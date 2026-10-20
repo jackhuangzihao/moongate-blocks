@@ -21,6 +21,7 @@
 | 布局、场景绘制协调与拖动 | `js/views/layout.js`、`js/renderer.js`、`js/views/drag-placement.js` |
 | 菜单、弹层、棋盘绘制 | `js/views/menu-view.js`、`js/views/panel-view.js`、`js/views/board-view.js` |
 | 共用绘图与美术 | `js/views/canvas-ui.js`、`js/views/board-symbols.js`、`js/views/art.js` |
+| 外观偏好、配色与选择面板 | `js/progression/appearance.js`、`js/views/themes.js`、`js/views/appearance-view.js` |
 | 棋盘与方块规则 | `js/rules/board.js`、`js/rules/shapes.js`、`js/config.js` |
 | 庭院充能选择、消除格与计分计算 | `js/rules/garden-rules.js`（状态与保存仍由 `game.js` 协调） |
 | 闯关规则与关卡 | `js/challenge/challenges.js`、`js/challenge/challenge-*.js`、`js/rules/level-data.js` |
@@ -116,9 +117,10 @@
 - 不重复读取未改变且已掌握的内容；修改后检查必要差异。
 - 不为节省 Token 省略调用关系、数据兼容、边界条件或验证。
 - 复杂功能按需调研，优先现有实现和平台官方文档。
-- GitHub 参考需核实许可证、维护情况、微信兼容性及资源来源。
+- 可根据任务需要主动查阅 GitHub 公开仓库和资料作为参考；需核实许可证、维护情况、微信兼容性及资源来源。
 - 借鉴方案不等于获准复制；无明确许可的代码、素材和品牌不直接使用。
-- 不为采用开源方案重写架构；新增依赖或引入外部代码先写入确认方案。
+- 不为采用开源方案重写架构；引入外部代码或新增依赖前，须在方案中说明用途、来源、许可证及影响，并获得用户明确确认后再实施。允许调研不等于允许引入。
+- 不将本项目源码或源码片段上传、推送或粘贴到 GitHub 或其他外部平台；调研时不通过搜索词、问题描述、日志或附件泄露项目源码、私有资料或凭据。
 - 不默认创建额外 Agent、脚本、框架或服务。
 
 ## 6. 本地 Git 与已有文件保护

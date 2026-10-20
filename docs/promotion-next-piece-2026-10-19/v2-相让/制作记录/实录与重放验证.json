@@ -1,0 +1,189 @@
+{
+  "width": 1080,
+  "height": 1920,
+  "fps": 60,
+  "seconds": 10,
+  "level": 14,
+  "title": "相让",
+  "goal": "完成 3 次区域消除",
+  "thinkingSeconds": 3,
+  "thinkingBoardUnchanged": true,
+  "solution": [
+    [
+      1,
+      5,
+      1
+    ],
+    [
+      0,
+      4,
+      3
+    ],
+    [
+      2,
+      0,
+      3
+    ],
+    [
+      1,
+      1,
+      0
+    ],
+    [
+      2,
+      2,
+      2
+    ]
+  ],
+  "actualStars": 3,
+  "moveFrames": [
+    {
+      "move": [
+        1,
+        5,
+        1
+      ],
+      "start": 180,
+      "arrive": 204,
+      "release": 210
+    },
+    {
+      "move": [
+        0,
+        4,
+        3
+      ],
+      "start": 230,
+      "arrive": 254,
+      "release": 264
+    },
+    {
+      "move": [
+        2,
+        0,
+        3
+      ],
+      "start": 284,
+      "arrive": 308,
+      "release": 324
+    },
+    {
+      "move": [
+        1,
+        1,
+        0
+      ],
+      "start": 350,
+      "arrive": 374,
+      "release": 384
+    },
+    {
+      "move": [
+        2,
+        2,
+        2
+      ],
+      "start": 404,
+      "arrive": 428,
+      "release": 450
+    }
+  ],
+  "audioEvents": [
+    {
+      "clock": 1792386082550.3833,
+      "src": "assets/audio/place.wav",
+      "gain": 0.32,
+      "rate": 1,
+      "loop": false,
+      "time": 3.50001708984375
+    },
+    {
+      "clock": 1792386083450.3877,
+      "src": "assets/audio/place.wav",
+      "gain": 0.32,
+      "rate": 1,
+      "loop": false,
+      "time": 4.400021484375
+    },
+    {
+      "clock": 1792386084450.3926,
+      "src": "assets/audio/clear.wav",
+      "gain": 0.502,
+      "rate": 1,
+      "loop": false,
+      "time": 5.4000263671875
+    },
+    {
+      "clock": 1792386085450.3975,
+      "src": "assets/audio/place.wav",
+      "gain": 0.32,
+      "rate": 1,
+      "loop": false,
+      "time": 6.40003125
+    },
+    {
+      "clock": 1792386086550.4028,
+      "src": "assets/audio/combo.wav",
+      "gain": 0.38,
+      "rate": 1,
+      "loop": false,
+      "time": 7.50003662109375
+    },
+    {
+      "clock": 1792386086683.7368,
+      "src": "assets/audio/win.wav",
+      "gain": 0.35,
+      "rate": 1,
+      "loop": false,
+      "time": 7.63337060546875
+    }
+  ],
+  "sourceHashes": {
+    "game.js": "c5c21a08a4161b1895f4fce8d9c2ed8b8ddca260b7a56413ebd38d2b7aaa9483",
+    "./js/challenge/challenge-chapter-five": "2a6872de1db224b9ec33759c2ce813a3152027d35646230626209f4901a2507b",
+    "./js/challenge/challenge-chapter-four": "21cbf6b535eba75991219e7a866fbceecc400868092487fcde41713de500c173",
+    "./js/challenge/challenge-expansion": "b51d8f72801380535bf2e737cc9191a01ccf85bea6f2fe0e7c2a148d3f4c4d43",
+    "./js/challenge/challenge-layouts": "a6b1d2185e07261a394363ce4f7cfd0a9e607cb5297adca821808325cf9ce5bb",
+    "./js/challenge/challenge-levels": "c98d0c756cf6c4c8125eaf64c953f37f8bd55f5a1e1ceda48417cff5037148f7",
+    "./js/challenge/challenges": "bc841fbc0af104aa6c24c954a4124619443a30f698aa1ddf8fd0c2cb574506c3",
+    "./js/config": "b369461c6f3fe5d29f9debb58beb2c38ac2b496b201fa5beb118ea1d9a41fbda",
+    "./js/daily/daily-levels": "c29acfe4fdb06ba1afe85752d50704593f03649d9e5d838325ec558754e91ddc",
+    "./js/daily/daily-week-one": "746d9fc9a639e42191dbc590e0248d948a4548bb7ca588b0e2b571faf703f640",
+    "./js/daily/daily-week-two": "44c7d29e8a8d95d25fc98ae09709c73f65da2d2b554f8dffd897855d73d15aa7",
+    "./js/daily/daily": "0c8b23e11e796a38c12d5c56d1908067dc7b5214f2c8e3f4b9a41a2029068a5f",
+    "./js/gravity/gravity-engine": "2ee1342aae135d440c7ca635b6fbe4d746ad584c26d113d719aeaa8b694dfc79",
+    "./js/gravity/gravity-mode": "6a8b591fa178651f7ecdcafc35b1cc51e09fa9763baa164bbdf3b35c28789be4",
+    "./js/gravity/gravity-view": "499cfe870d8a75a93e37bd3e49b97a7884fd850dbfaf16d3db3a7699b12f8d1a",
+    "./js/persistence/saves": "d28a3145a856fc2b976129f4c9877b308afc5e43fafdfbed274ceb39ed7cae56",
+    "./js/persistence/storage": "2fd7820b3c11dbf64ac6dc1a7671b0b26f994a4d3912050e81afc12d6b50d19b",
+    "./js/platform/analytics": "19ec375786b8d3ad3db566bcc6480eee96f85ededee286b618ab3e1578b8921c",
+    "./js/platform/feedback": "37f0141bbd92cedf66d6793a86e9928854ea4d3409cbc082ca401a256e68e793",
+    "./js/platform/leaderboard": "bfaf7b8d8d02cb1a2952101c0e2e7157e57ca4607d541c8842c9c0e510807465",
+    "./js/platform/player-feedback": "abc319d3a4481b37eaf12d1e2c24f3a396f3a1254259577497676869fd89dc50",
+    "./js/platform/rewarded-ad": "28edaf1077c996eed521dd14507494485604f25cf07d18c9d28a99ef450434f9",
+    "./js/platform/sharing": "23f7e9a58189c0f552d9892c5e9cb1526853515dc296d09bf6aa689eb92f8819",
+    "./js/progression/appearance": "77c5b96f00506fb1043b2e0db7e6846d4cd0f49d7df0d33b0b1465c91be5a66d",
+    "./js/progression/basics": "21ae50cc1e46ffd96a367d0696dea609dba9152fa7f12000278fedf480b30bf3",
+    "./js/progression/collection": "2f1436edddd6463fb376d1099cb568845dc8ebd240ae107a23af14e981280071",
+    "./js/progression/goals": "1b6a29030d749afe0ca75427c78b1b00cdf25f4805b84bf1eb99b81c4ced9553",
+    "./js/progression/mechanic-guide": "fd95e5d73ec355e5d2613dfa3182e436be0b2eae02e07d6df16d02aabe373490",
+    "./js/renderer": "5148c19eeaa8c55ec5e769e175e28b4ed600f69c6c5891e852eaec3ec7719fae",
+    "./js/rules/board": "c118e02ecbe9e9c01e15a30e8805f81ba5c0f3126da47c9e1c93d66518fb923b",
+    "./js/rules/garden-rules": "a40b82cc0930ff553fe271fd7af6c11649df599449fb18684c2f06712e7a016b",
+    "./js/rules/level-data": "73d1b566bf65773eb64239478af629913345763d8fd75e160a5ebd1c46ec8447",
+    "./js/rules/shapes": "b71eaf6c330028996245cf0578f39f2c8a4d3af77b6745b5e5ae0ef290ec4d51",
+    "./js/rules/tools": "8f4b9b62d3c741981e44bd0d953abe972f39ddfe62d474b7faf43c5083a5187a",
+    "./js/rules/undo-budget": "d931c50a2f52ea368043c12f76f8c66ddb23eb03d3e1502a98f6bb373565ad7c",
+    "./js/views/appearance-view": "4031aae316f8063ee019de4fd130545afb49252c52ba3d7a12da2541cb073390",
+    "./js/views/art": "515814123580caf4626f0935120c82b7ea5f1e173c9f8690f3557f9c63a5bbc7",
+    "./js/views/board-symbols": "1cb13f12500604998da73c020944017f55043103637bf01b7d1fcb0f87b8aeb3",
+    "./js/views/board-view": "04bf9e7ae69ba8ce8e65fff9666dd13d69560b15f65815fe025212da7b8e6c71",
+    "./js/views/canvas-ui": "9ce62c4128fcd81427846ce2fceab8d2aab3d3dba37c4663536c33d3d0f41b71",
+    "./js/views/drag-placement": "7d8701207d3d832119040fef2d0496bf1e66079332e7d475677059fdd5408462",
+    "./js/views/layout": "1139b6d4c9b539119d6659833c45203684d71c971056981d1aeeb811e64770a5",
+    "./js/views/menu-view": "0e355cac0ba01041efe1e7c471721773c56dfde08178594bd25d12e9b001cdca",
+    "./js/views/panel-view": "01907cc058db2d73cc5aa0aae3a4bc618e1f39454f4a64453bacaf32fb58a858",
+    "./js/views/themes": "9543ff2c2f687d78bdf78ac5e7bc0a27a5f6444523b9bc418191d91c5a9bc6bb"
+  },
+  "capture": "Current game.js in browser WeChat preview bridge. All preceding first-chapter levels completed through normal inputs; level 14 recorded continuously with an unchanged three-second puzzle interval, normal drag input and native win animation. The final piece initially overlaps an occupied cell, freed by move three. No board, tray, score, guide, progress or save injection."
+}

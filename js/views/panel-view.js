@@ -4,7 +4,7 @@ const goals = require('../progression/goals');
 const { roundedRect, text, pressedRect, button, wrapText } = require('./canvas-ui');
 const { drawTarget, drawFlower, drawKey } = require('./board-symbols');
 
-const SETTINGS_PANEL_HEIGHT = 474;
+const SETTINGS_PANEL_HEIGHT = 518;
 
 function getSettingsButton(layout) {
   return { x: layout.width - 64, y: layout.settingsY, width: 48, height: 48 };
@@ -42,7 +42,7 @@ function drawConfirm(ctx, layout, state) {
     : '保留本局，稍后可以继续', layout.width / 2, panelY + 84);
   const cancelButton = pressedRect(state, 'confirm-cancel', actions.cancel);
   const confirmButton = pressedRect(state, 'confirm-confirm', actions.confirm);
-  ctx.fillStyle = '#EFE7DA';
+  ctx.fillStyle = COLORS.surfaceWarm;
   roundedRect(ctx, cancelButton.x, cancelButton.y,
     cancelButton.width, cancelButton.height, 23);
   ctx.fill();
@@ -54,26 +54,26 @@ function drawConfirm(ctx, layout, state) {
   ctx.fillStyle = COLORS.secondaryText;
   ctx.fillText('取消', cancelButton.x + cancelButton.width / 2,
     cancelButton.y + cancelButton.height / 2 + 5);
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = COLORS.onPrimary;
   ctx.fillText('确定', confirmButton.x + confirmButton.width / 2,
     confirmButton.y + confirmButton.height / 2 + 5);
 }
 
-function getSettingsActions(layout) {
+function settingsPanel(layout) {
   const width = Math.min(310, layout.width - 48);
   const x = (layout.width - width) / 2;
-  const y = (layout.height - SETTINGS_PANEL_HEIGHT) / 2;
-  return {
-    sound: { x: x + 24, y: y + 72, width: width - 48, height: 48 },
-    // 音乐与音效分开：想关背景音乐的人通常还想留着落子和消除的反馈音。
-    music: { x: x + 24, y: y + 126, width: width - 48, height: 48 },
-    vibration: { x: x + 24, y: y + 180, width: width - 48, height: 48 },
-    guide: { x: x + 24, y: y + 234, width: width - 48, height: 48 },
-    feedback: { x: x + 24, y: y + 288, width: width - 48, height: 48 },
-    restart: { x: x + 24, y: y + 352, width: width - 48, height: 48 },
-    menu: { x: x + 24, y: y + 406, width: width - 48, height: 48 },
-    close: { x: x + width - 60, y: y + 6, width: 48, height: 48 }
-  };
+  const height = Math.min(SETTINGS_PANEL_HEIGHT, layout.height - layout.safeTop - layout.safeBottom - 8);
+  const y = layout.safeTop + (layout.height - layout.safeTop - layout.safeBottom - height) / 2;
+  return { x, y, width, height };
+}
+function getSettingsActions(layout) {
+  const { x, y, width, height } = settingsPanel(layout), actions = {};
+  const step = (height - 64 - 24 - 48) / 7;
+  ['sound', 'music', 'vibration', 'guide', 'appearance', 'feedback', 'restart', 'menu'].forEach((name, i) => {
+    actions[name] = { x: x + 24, y: y + 64 + i * step, width: width - 48, height: 48 };
+  });
+  actions.close = { x: x + width - 60, y: y + 6, width: 48, height: 48 };
+  return actions;
 }
 
 function drawToggle(ctx, rect, enabled, state, id) {
@@ -99,11 +99,9 @@ function drawSettings(ctx, layout, state) {
   ctx.fillStyle = 'rgba(45, 49, 46, 0.48)';
   ctx.fillRect(0, 0, layout.width, layout.height);
   const actions = getSettingsActions(layout);
-  const panelX = actions.sound.x - 24;
-  const panelY = actions.sound.y - 72;
-  const panelWidth = actions.sound.width + 48;
+  const { x: panelX, y: panelY, width: panelWidth, height } = settingsPanel(layout);
   ctx.fillStyle = COLORS.panel;
-  roundedRect(ctx, panelX, panelY, panelWidth, SETTINGS_PANEL_HEIGHT, 22);
+  roundedRect(ctx, panelX, panelY, panelWidth, height, 22);
   ctx.fill();
 
   ctx.textAlign = 'center';
@@ -121,18 +119,21 @@ function drawSettings(ctx, layout, state) {
   ctx.fillText('音效', actions.sound.x, actions.sound.y + 30);
   ctx.fillText('音乐', actions.music.x, actions.music.y + 30);
   ctx.fillText('震动', actions.vibration.x, actions.vibration.y + 30);
-  ctx.fillStyle = state.pressedButton === 'settings-guide' ? COLORS.primaryButton : COLORS.text;
+  ctx.fillStyle = state.pressedButton === 'settings-guide' ? COLORS.accent : COLORS.text;
   ctx.fillText('玩法说明', actions.guide.x, actions.guide.y + 30);
+  ctx.fillStyle = state.pressedButton === 'settings-appearance' ? COLORS.accent : COLORS.text;
+  ctx.fillText('外观', actions.appearance.x, actions.appearance.y + 30);
   ctx.textAlign = 'right';
   ctx.fillStyle = COLORS.secondaryText;
   ctx.font = '18px sans-serif';
   ctx.fillText('›', actions.guide.x + actions.guide.width, actions.guide.y + 30);
+  ctx.fillText('›', actions.appearance.x + actions.appearance.width, actions.appearance.y + 30);
   drawToggle(ctx, actions.sound, state.soundEnabled, state, 'settings-sound');
   drawToggle(ctx, actions.music, state.musicEnabled, state, 'settings-music');
   drawToggle(ctx, actions.vibration, state.vibrationEnabled, state, 'settings-vibration');
 
   const feedbackButton = pressedRect(state, 'settings-feedback', actions.feedback);
-  ctx.fillStyle = '#F4EFE5';
+  ctx.fillStyle = COLORS.surfaceMuted;
   roundedRect(ctx, feedbackButton.x, feedbackButton.y, feedbackButton.width, feedbackButton.height, 12);
   ctx.fill();
   ctx.textAlign = 'center';
@@ -140,18 +141,17 @@ function drawSettings(ctx, layout, state) {
   ctx.font = '16px sans-serif';
   ctx.fillText('意见反馈  ›', layout.width / 2, feedbackButton.y + feedbackButton.height / 2 + 5);
 
-  if(state.screen!=='menu')text(ctx,'有问题或建议？欢迎反馈',layout.width/2,actions.feedback.y+60,11,COLORS.secondaryText);
   if (state.screen === 'menu') {
     ctx.textAlign = 'center';
     ctx.fillStyle = COLORS.secondaryText;
     ctx.font = '13px sans-serif';
-    ctx.fillText('哪里不清楚、哪里不好玩，都欢迎反馈', layout.width / 2, panelY + 380);
+    ctx.fillText('哪里不清楚、哪里不好玩，都欢迎反馈', layout.width / 2, actions.restart.y + 24);
     ctx.font = '12px sans-serif';
-    ctx.fillText('我们会参考大家的反馈持续改进', layout.width / 2, panelY + 404);
+    ctx.fillText('我们会参考大家的反馈持续改进', layout.width / 2, actions.restart.y + 48);
   } else {
     const restartButton = pressedRect(state, 'settings-restart', actions.restart);
     const menuButton = pressedRect(state, 'settings-menu', actions.menu);
-    ctx.fillStyle = '#EFE7DA';
+    ctx.fillStyle = COLORS.surfaceWarm;
     roundedRect(ctx, restartButton.x, restartButton.y,
       restartButton.width, restartButton.height, 23);
     ctx.fill();
@@ -161,7 +161,7 @@ function drawSettings(ctx, layout, state) {
     ctx.fillText('重新开始', layout.width / 2,
       restartButton.y + restartButton.height / 2 + 5);
 
-    ctx.fillStyle = '#F4EFE5';
+    ctx.fillStyle = COLORS.surfaceMuted;
     roundedRect(ctx, menuButton.x, menuButton.y,
       menuButton.width, menuButton.height, 22);
     ctx.fill();
@@ -173,7 +173,7 @@ function drawSettings(ctx, layout, state) {
 }
 
 function getHelpActions(layout) {
-  const width=Math.min(330,layout.width-32),height=410,x=(layout.width-width)/2,y=(layout.height-height)/2;
+  const width=Math.min(330,layout.width-32),height=330,x=(layout.width-width)/2,y=(layout.height-height)/2;
   return {panel:{x,y,width,height},practice:{x:x+16,y:y+height-62,width:(width-40)/2,height:48},
     confirm:{x:x+24+(width-40)/2,y:y+height-62,width:(width-40)/2,height:48}};
 }
@@ -188,23 +188,22 @@ function drawHelp(ctx,layout,state) {
     '填满行、列或 3×3 九宫即可消除',
     '自由消除：冲高分，全放不下时结束',
     '目标闯关：限步达标，争取三星',
-    '消除、集星星，解锁庭院花木',
-    '方块不能旋转。希望加入？欢迎反馈，我们会结合关卡平衡评估'
+    '方块不能旋转',
+    '消除、集星星，解锁庭院花木'
   ];
   let yy=y+66;
   for(const line of lines)yy=wrapText(ctx,line,x+20,yy,width-40,13);
-  text(ctx,'建议入口：设置 → 意见反馈',center,yy+1,12,COLORS.primaryButton);
   const run=state.screen==='playing'?state.challenge:null;
   const mode=MODES[state.mode] || MODES.easy;
   const extra=run?'本关规则：点击棋盘上方的目标卡查看'
     :mode.help || (mode.blocked.length?`${mode.title}：${mode.description}`:'带 ✦ 九宫可充能，满三点后下一组送幸运方块');
-  wrapText(ctx,extra,x+20,y+height-111,width-40,11);
+  wrapText(ctx,extra,x+20,yy+12,width-40,11);
   button(ctx,a.practice,'基础练习',false,state,'help-practice',14);
   button(ctx,a.confirm,'知道了',true,state,'help-confirm',14);
 }
 
 function getGoalAction(layout) {
-  return {x:layout.horizontalPadding,y:layout.boardY-60,width:layout.width-layout.horizontalPadding*2,height:44};
+  return {x:layout.horizontalPadding,y:layout.goalY,width:layout.width-layout.horizontalPadding*2,height:44};
 }
 
 function getPlayPanelActions(layout, state) {
@@ -229,9 +228,9 @@ function drawGoalExample(ctx,x,y,width,description) {
     ctx.fillStyle=COLORS.block;roundedRect(ctx,center+42,y,size,size,5);ctx.fill();
   } else if(kind==='keys') {
     drawKey(ctx,center-76,y,size,'A');
-    ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=1;ctx.setLineDash([3,2]);
+    ctx.strokeStyle=COLORS.accent;ctx.lineWidth=1;ctx.setLineDash([3,2]);
     roundedRect(ctx,center+42,y,size,size,5);ctx.stroke();ctx.setLineDash([]);
-    text(ctx,'开',center+59,y+24,14,COLORS.primaryButton);
+    text(ctx,'开',center+59,y+24,14,COLORS.accent);
   } else if(kind==='stones') {
     drawTarget(ctx,center-76,y,size);ctx.strokeStyle=COLORS.boardEdge;ctx.lineWidth=1;
     roundedRect(ctx,center+42,y,size,size,5);ctx.stroke();
@@ -242,7 +241,7 @@ function drawGoalExample(ctx,x,y,width,description) {
       const active=kind==='rows'?r===4:kind==='cols'?c===4:grid===9?r===4||(c>=3&&c<6&&r>=3&&r<6):true;
       const filled=side===0&&active,xx=center+(side?34:-94)+c*cell,yy=y+r*cell;
       ctx.fillStyle=filled?COLORS.block:COLORS.emptyCell;roundedRect(ctx,xx,yy,cell-1,cell-1,2);ctx.fill();
-      if(kind==='area'){ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=.7;ctx.stroke();}
+      if(kind==='area'){ctx.strokeStyle=COLORS.accent;ctx.lineWidth=.7;ctx.stroke();}
     }
   }
   text(ctx,description.caption,center,y+70,11,COLORS.secondaryText);
@@ -257,7 +256,7 @@ function drawPlayPanel(ctx,layout,state) {
   if(state.playPanel==='goal'){
     const description=goals.describe(state);
     text(ctx,description.title,center,y+39,21,COLORS.text,'center','600');
-    text(ctx,description.goal,center,y+72,16,COLORS.primaryButton,'center','600');
+    text(ctx,description.goal,center,y+72,16,COLORS.accent,'center','600');
     let lineY=y+101;
     for(const line of description.lines)lineY=wrapText(ctx,line,x+20,lineY,width-40);
     drawGoalExample(ctx,x,y+240,width,description);
@@ -266,7 +265,7 @@ function drawPlayPanel(ctx,layout,state) {
   } else {
     const supplement=undoBudget.canSupplement(state),remaining=undoBudget.remaining(undoBudget.current(state));
     text(ctx,supplement?'补充一次撤回':'回到哪一步？',center,y+41,21,COLORS.text,'center','600');
-    text(ctx,supplement?'完整观看视频，获得 1 次机会':`本局剩余 ${remaining} 次撤回机会`,center,y+81,14,COLORS.primaryButton);
+    text(ctx,supplement?'完整观看视频，获得 1 次机会':`本局剩余 ${remaining} 次撤回机会`,center,y+81,14,COLORS.accent);
     text(ctx,supplement?`本局还可补充 ${undoBudget.MAX_GRANTS-undoBudget.current(state).grants} 次`:'退 1～3 步，都只消耗 1 次机会',center,y+111,12,COLORS.secondaryText);
     for(const [steps,rect] of Object.entries(actions.steps))button(ctx,rect,`退 ${steps} 步`,Number(steps)===state.undoSteps,state,'undo-step-'+steps,14);
     if(supplement)text(ctx,'未完整观看不发放，也不占补充次数',center,y+158,12,COLORS.secondaryText);

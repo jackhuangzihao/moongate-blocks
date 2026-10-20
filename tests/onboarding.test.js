@@ -45,6 +45,8 @@ assert.equal(G.move(guide,{...run,invited:true}),null);
 assert.equal(G.move(guide,{...run,dailyDate:'2026-10-06'}),null);
 // First completion emphasizes the goal; subsequent attempts show star targets.
 const first=boot();first.run('startChallenge(0)');
+assert.ok(first.draw().some(x=>x.text==='把下方描边方块拖到虚线处，试试看'));
+first.tap(first.run('mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip'));
 assert.ok(first.draw().some(x=>x.text==='先完成目标 · 通关后可再争三星'));
 first.complete();first.run('restartGame()');
 assert.ok(first.draw().some(x=>x.text.includes('三星还可用')));
@@ -71,3 +73,29 @@ assert.equal(garden.run('undoBudget.remaining(state.undoBudget)'),1);
 assert.ok(K.unlocked(garden.run('state.collection'),0).includes('bamboo'));
 assert.ok(garden.run('state.feedback').includes('正式挑战'));
 console.log('PASS: chapter demonstrations, off-path/relaunch/skip, invalid drops and staged garden practice');
+// Collapse is presentation-only: an invalid drop keeps the puzzle and learning state.
+for(const size of [{w:320,h:568},{w:390,h:844}]){
+  const app=boot({}, {size});app.run('startChallenge(36)');
+  const before=clone(app.run('state.challenge'));
+  app.move([0,3,3]);
+  assert.deepStrictEqual(clone(app.run('state.challenge')),before);
+  assert.equal(app.run('state.mechanicGuide.collapsed'),true);
+  assert.ok(app.draw().some(x=>x.text==='展开'));
+  assert.ok(!app.store.fangcunMechanicsSeenV1?.flowers);
+  app.tap(app.run('mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip'));
+  assert.equal(app.run('state.mechanicGuide.collapsed'),false);
+  assert.ok(app.draw().some(x=>x.text==='跳过'));
+}
+// Collapsed teaching reuses the goal card, leaving every board cell uncovered.
+for(const size of [{w:320,h:568},{w:390,h:844}]){
+  const app=boot({}, {size});app.run('startChallenge(36);state.mechanicGuide.collapsed=true');
+  const rect=app.run('mechanicGuide.rects(layout,state.mechanicGuide,state.challenge)');
+  assert.ok(rect.panel.y+rect.panel.height<=app.run('layout.boardY'));
+  const before=clone(app.run('state.challenge'));
+  app.tap(app.run('({x:layout.horizontalPadding,y:layout.goalY,width:60,height:44})'));
+  assert.equal(app.run('state.playPanel'),'goal','left side still opens the goal rules');
+  app.run('state.playPanel=null');
+  app.tap(rect.skip);
+  assert.equal(app.run('state.mechanicGuide.collapsed'),false);
+  assert.deepStrictEqual(clone(app.run('state.challenge')),before);
+}

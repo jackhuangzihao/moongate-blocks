@@ -4,6 +4,7 @@ const daily = require('../daily/daily');
 const art = require('../views/art');
 const { roundedRect } = require('../views/canvas-ui');
 const { drawTarget, drawFlower, drawKey, drawGate } = require('../views/board-symbols');
+const themes = require('../views/themes');
 const GARDEN_COLORS = { ...COLORS };
 let cardCanvas;
 
@@ -17,8 +18,11 @@ function validDate(value) {
 function parseInvitation(query) {
   if (!query || typeof query !== 'object' || Array.isArray(query)) return null;
   const proto = Object.getPrototypeOf(query), own = key => Object.prototype.hasOwnProperty.call(query, key);
-  if ((proto !== null && Object.getPrototypeOf(proto) !== null) || ['__proto__', 'constructor', 'prototype'].some(own)
-    || !['challenge', 'level', 'rule'].every(own) || query.challenge !== '1'
+  if ((proto !== null && Object.getPrototypeOf(proto) !== null) || ['__proto__', 'constructor', 'prototype'].some(own)) return null;
+  // A mode entry carries no board, score, rewards or chapter identifiers.
+  if (own('mode')) return query.mode === 'gravity'
+    && !['challenge','level','rule','daily','steps','help'].some(own) ? { mode: 'gravity' } : null;
+  if (!['challenge', 'level', 'rule'].every(own) || query.challenge !== '1'
     || typeof query.level !== 'string' || !/^-?[1-9]\d{0,2}$/.test(query.level)
     || typeof query.rule !== 'string' || !/^[1-9]\d{0,3}$/.test(query.rule)) return null;
   const encoded = Number(query.level), level = encoded < 0 ? encoded : encoded - 1, rule = Number(query.rule);
@@ -61,20 +65,26 @@ function challengeQuery(run, steps = benchmarkSteps(run)) {
 }
 
 function resultCard(state) {
+  if (state.screen === 'gravity' && state.gravityResult && state.gravityResult.over) {
+    const result = state.gravityResult;
+    return { challenge: false, gravity: true, decor: (state.decor || []).slice(), query: 'mode=gravity',
+      heading: '落玉庭 · 连锁挑战', stat: `${result.score} 分`, detail: `最长 ${result.chain} 连锁 · 你能超过吗？`,
+      title: `落玉庭这局 ${result.score} 分、${result.chain} 连锁，你能超过吗？` };
+  }
   if (state.screen !== 'playing' || !state.gameOver || (state.challenge && !state.challenge.won)) return null;
   const run = state.challenge, level = run && challenges.level(run.level);
   const daily = run && validDate(run.dailyDate) ? run.dailyDate : '';
   return run ? {
-    challenge: true, level: Math.abs(run.level < 0 ? run.level : run.level + 1), stars: challenges.stars(run),
+    challenge: true, level: daily ? null : level.number, stars: challenges.stars(run),
     query: challengeQuery(run, run.history.length),
     heading: daily ? `每日精选 · ${daily.slice(5).replace('-', '月')}日` : `第 ${level.number} 关 · ${level.title}`,
-    stat: `${run.history.length} 步通关`, detail: `${challenges.stars(run)} 星达成 · 来试试你的解法`,
-    title: daily ? `${daily} 每日精选，我用 ${run.history.length} 步拿到 ${challenges.stars(run)} 星，你也来试试？`
-      : `我用 ${run.history.length} 步拿下第 ${level.number} 关 ${challenges.stars(run)} 星，你也来试试？`
+    stat: `${run.history.length} 步通关`, detail: `${challenges.stars(run)} 星达成 · 你能用更少步吗？`,
+    title: daily ? `${daily} 每日精选，我用 ${run.history.length} 步完成，你能更少吗？`
+      : `第 ${level.number} 关，${run.history.length} 步 ${challenges.stars(run)} 星，你能比我更少吗？`
   } : {
     challenge: false, heading: `清雅庭院 · ${MODES[state.mode].title}`, decor: (state.decor || []).slice(),
     stat: `${state.score} 分`, detail: state.score > state.startingBest ? '刷新个人纪录 · 方寸之间再进一步' : '落子成局 · 来庭院里坐一会儿',
-    title: `我在${MODES[state.mode].title}拿到 ${state.score} 分，来庭院里摆一局？`
+    title: `这局${MODES[state.mode].title} ${state.score} 分，你能超过吗？`
   };
 }
 
@@ -83,7 +93,7 @@ function helpCard(state) {
   if(state.screen!=='playing' || !state.gameOver || !run || !run.ended || run.won)return null;
   const level=challenges.level(run.level);
   return {challenge:true,help:true,heading:run.dailyDate?`${run.dailyDate} · 每日精选`:`第 ${level.number} 关 · ${level.title}`,
-    query:challengeQuery(run,null)+'&help=1',title:`这道题我卡住了：${level.title}，帮我想想怎么摆？`,
+    query:challengeQuery(run,null)+'&help=1',title:run.dailyDate?`${run.dailyDate} 每日精选把我难住了，你能找到解法吗？`:`第 ${level.number} 关把我难住了，你能找到解法吗？`,
     stat:challenges.goal(level),detail:'朋友从初始棋盘尝试 · 图片为我的局面',
     progress:`目标 ${Math.min(run.progress,level.target)}/${level.target} · 剩余 ${Math.max(0,level.limit-run.history.length)} 步`,
     board:run.board.map(row=>row.slice()),ice:run.ice.map(p=>p.slice()),stones:run.stones.map(p=>p.slice()),
@@ -128,6 +138,13 @@ function drawHelpCard(ctx,card) {
 
 // A dedicated 5:4 card keeps buttons and system UI out of the shared image.
 function drawCard(ctx, card) {
+  const previous = { ...COLORS };
+  // Shared cards keep their established colors; never leak a temporary palette into gameplay.
+  Object.assign(COLORS, themes.palette('classic', Boolean(card.challenge || card.help)));
+  try { drawCardContent(ctx, card); }
+  finally { Object.assign(COLORS, previous); }
+}
+function drawCardContent(ctx, card) {
   if(card.help){drawHelpCard(ctx,card);return;}
   const ink = card.challenge ? '#263E6A' : GARDEN_COLORS.text;
   ctx.fillStyle = card.challenge ? '#E8EFFB' : GARDEN_COLORS.background;
@@ -138,7 +155,7 @@ function drawCard(ctx, card) {
   ctx.fillStyle = ink; ctx.font = '600 52px sans-serif'; ctx.fillText(card.stat, 300, 300);
   if (card.challenge) for (let i = 0; i < 3; i++) art.star(ctx, 300 + (i - 1) * 40, 336, 13, i < card.stars ? '#B47D26' : '#ACBCD7');
   ctx.fillStyle = ink; ctx.font = '22px sans-serif'; ctx.fillText(card.detail, 300, 392);
-  ctx.font = '18px sans-serif'; ctx.fillText('方寸九宫 · 清雅庭院 / 闯关挑战', 300, 449);
+  ctx.font = '18px sans-serif'; ctx.fillText(card.gravity ? '方寸九宫 · 落玉庭' : '方寸九宫 · 清雅庭院 / 闯关挑战', 300, 449);
 }
 
 function renderCard(wx, card) {
@@ -161,6 +178,11 @@ function share(wx, state) {
 
 // 不在结算页时，右上角转发用的卡片：展示玩家自己的庭院和最好成绩。
 function menuCard(state) {
+  if (state.screen === 'gravity') return {
+    challenge: false, gravity: true, decor: (state.decor || []).slice(), query: 'mode=gravity',
+    heading: '方寸九宫 · 落玉庭', stat: '消除后下落', detail: '填满行、列或九宫 · 落稳再连锁',
+    title: '落玉庭：消除后下落，来试试连锁消除？'
+  };
   const dailyLevel = state.screen === 'daily' ? daily.entryLevel(state.dailyProgress,state.today) : null;
   const dailyInvitation = state.invitation && state.invitation.dailyDate === state.today
     && state.invitation.level === dailyLevel ? state.invitation : null;
@@ -169,7 +191,7 @@ function menuCard(state) {
     : state.screen === 'invitation' ? state.invitation : null;
   if (run && challenges.level(run.level)) {
     const level = challenges.level(run.level), daily = validDate(run.dailyDate) ? run.dailyDate : '';
-    return { challenge: true, level: Math.abs(run.level < 0 ? run.level : run.level + 1), stars: 0, query: challengeQuery(run),
+    return { challenge: true, level: daily ? null : level.number, stars: 0, query: challengeQuery(run),
       heading: daily ? `每日精选 · ${daily.slice(5).replace('-', '月')}日` : `第 ${level.number} 关 · ${level.title}`,
       stat: benchmarkText(run) || (daily ? '今天，一起解这一题' : '同一题，试试你的解法'), detail: challenges.goal(level),
       title: daily ? `${daily} 每日精选，来试试你的解法？` : `方寸九宫第 ${level.number} 关 · ${level.title}，来试试你的解法？` };

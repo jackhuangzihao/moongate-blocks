@@ -18,7 +18,7 @@ function createPlayerFeedback(wxApi, onTap) {
         type: 'text', text: '意见反馈  ›',
         style: {
           left: rect.x, top: rect.y, width: rect.width, height: rect.height,
-          backgroundColor: '#F4EFE5', borderColor: '#F4EFE5', borderWidth: 0,
+          backgroundColor: COLORS.surfaceMuted, borderColor: COLORS.surfaceMuted, borderWidth: 0,
           borderRadius: 12, color: COLORS.text, fontSize: 16,
           textAlign: 'center', lineHeight: rect.height
         }

@@ -41,12 +41,16 @@ const mechanicGuide = require('./js/progression/mechanic-guide');
 const basics = require('./js/progression/basics');
 const INVITATION_SAVE_KEY = 'fangcunInvitationV1';
 const collection = require('./js/progression/collection');
+const appearance = require('./js/progression/appearance');
+const themes = require('./js/views/themes');
+const { getAppearanceActions, drawAppearance } = require('./js/views/appearance-view');
 const analytics = require('./js/platform/analytics');
 const leaderboard = require('./js/platform/leaderboard');
 const sharing = require('./js/platform/sharing');
 const gameTools = require('./js/rules/tools');
 const undoBudget = require('./js/rules/undo-budget');
 const dragPlacement = require('./js/views/drag-placement');
+const { drawSettings, drawConfirm } = require('./js/views/panel-view');
 const rewardedAds = require('./js/platform/rewarded-ad').createRewardedAds(wx, REWARDED_AD_UNIT_ID);
 let foreground = true;
 const {
@@ -180,6 +184,8 @@ const state = {
   feedback: '',
   feedbackUntil: 0,
   settingsOpen: false,
+  appearance: null,
+  appearancePreview: null,
   helpOpen: false,
   confirmAction: null,
   pressedButton: '',
@@ -194,10 +200,17 @@ const state = {
   ownedDecor: [],
   decor: []
 };
+state.appearance = appearance.load(wx, state.challengeProgress);
 syncCollectionProgress();
 state.ownedDecor = collection.unlocked(state.collection, collection.totalStars(state.challengeProgress));
 state.decor = collection.displayed(state.collection, collection.totalStars(state.challengeProgress));
-sharing.enableMenuShare(wx, () => state);
+sharing.enableMenuShare(wx, currentShareState);
+
+function currentShareState() {
+  if(state.screen!=='gravity' || !gravityMode)return state;
+  const run=gravityMode.model.run;
+  return {...state,gravityResult:run&&run.mode==='free'?{score:run.score,chain:run.chain,over:run.over}:null};
+}
 
 const menuButtonRect = wx.getMenuButtonBoundingClientRect
   ? wx.getMenuButtonBoundingClientRect()
@@ -374,9 +387,15 @@ function stepAnimations(now) {
 }
 
 function present() {
+  if (sceneDirty) themes.apply(state);
   syncPlayerFeedback();
   if (sceneDirty) {
-    if(state.screen==='gravity')gravityMode.draw(sceneCtx,layout,state.pressedButton);
+    if(state.screen==='gravity'){
+      gravityMode.draw(sceneCtx,layout,state.pressedButton,themes.idFor(state));
+      drawSettings(sceneCtx,layout,state);
+      drawConfirm(sceneCtx,layout,state);
+      drawAppearance(sceneCtx,layout,state);
+    }
     else renderScene(sceneCtx, layout, state);
     sceneDirty = false;
   }
@@ -391,7 +410,7 @@ function present() {
 
 function syncPlayerFeedback() {
   const visible = foreground && state.settingsOpen && !state.helpOpen
-    && !state.confirmAction && !sceneTransition && !leaderboard.isOpen();
+    && !state.appearancePreview && !state.confirmAction && !sceneTransition && !leaderboard.isOpen();
   playerFeedback.sync(visible ? getSettingsActions(layout).feedback : null);
 }
 
@@ -429,6 +448,7 @@ if (wx.onHide) {
   wx.onHide(() => {
     if(foreground && state.screen==='playing' && !state.gameOver && !state.rewardBusy)reportPlay('session_pause',{reason:'background'});
     foreground = false;
+    state.appearancePreview = null;
     playerFeedback.sync(null);
     releaseStaleTouches();
     saveCurrentGame();
@@ -686,6 +706,8 @@ function saveCurrentGame() {
       state.challengeProgress.stars[id] = Math.max(state.challengeProgress.stars[id], challenges.stars(state.challenge));
       state.challengeProgress.bestSteps[id]=Math.min(state.challengeProgress.bestSteps[id] || Infinity,steps);
       state.challengeProgress.bestRules[id]=challenges.level(id).rule;
+      if (appearance.unlockFromProgress(state.appearance, state.challengeProgress))
+        persist(appearance.KEY, state.appearance);
     }
     persist(challenges.KEY, state.challengeProgress);
     if (state.challenge.won) refreshDecor();
@@ -794,6 +816,7 @@ function restartGame(restored = null, challengeRun = null, guided = false) {
   clearAnimation = null;
   trayAnimation = null;
   state.settingsOpen = false;
+  state.appearancePreview = null;
   state.helpOpen = false;
   state.confirmAction = null;
   state.screen = 'playing';
@@ -931,6 +954,16 @@ function receiveInvitation(query) {
   const invitation=sharing.parseInvitation(query);
   if (!invitation) return;
   if(state.rewardBusy){pendingInvitation=query;return;}
+  if(invitation.mode==='gravity'){
+    // Repeated onShow from a share must not restart the current gravity run.
+    if(state.screen==='gravity')return;
+    leaderboard.close(wx);
+    clearAnimation=trayAnimation=gameOverAnimation=sceneTransition=null;
+    state.transitionAlpha=0;state.inputLocked=false;state.confirmAction=null;
+    openGravity();
+    state.basics=null;state.basicsReturn=null;
+    return;
+  }
   const signature=JSON.stringify(invitation);
   const routedDate=invitation.dailyDate?daily.dateKey():null;
   const routedLevel=routedDate?daily.entryLevel(state.dailyProgress,routedDate):invitation.level;
@@ -948,7 +981,7 @@ function receiveInvitation(query) {
   leaderboard.close(wx);
   clearAnimation=trayAnimation=gameOverAnimation=sceneTransition=null;
   state.transitionAlpha=0; state.gameOver=false; state.inputLocked=false;
-  state.clearingCells=[]; state.breakingIce=[]; state.openingGates=[]; state.settingsOpen=false;state.helpOpen=false;state.confirmAction=null;state.playPanel=null;
+  state.clearingCells=[]; state.breakingIce=[]; state.openingGates=[]; state.settingsOpen=false;state.appearancePreview=null;state.helpOpen=false;state.confirmAction=null;state.playPanel=null;
   state.invitation=invitation;
   // A same-day link from the old bank opens as a separate trial when today's
   // active/new puzzle differs. Never apply its benchmark to the new puzzle.
@@ -1126,6 +1159,7 @@ function openGravity() {
   if (!gravityMode) {
     gravityMode = require('./js/gravity/gravity-mode').create({
       wx, invalidate: invalidateScene, press: startPress, persist, feedback,
+      share: () => sharing.share(wx,currentShareState()),
       leave: () => { state.screen = 'maps'; invalidateScene(); }
     });
   }
@@ -1133,6 +1167,7 @@ function openGravity() {
   state.homeMode = 'garden';
   state.playPanel = null;
   state.settingsOpen = false;
+  state.appearancePreview = null;
   state.helpOpen = false;
   gravityMode.enter();
   invalidateScene();
@@ -1142,7 +1177,7 @@ function returnHome() {
   if(state.basics){finishBasics('home');return;}
   if(state.screen==='playing' && !state.gameOver)reportPlay('session_exit',{reason:'home'});
   saveCurrentGame();
-  state.screen = 'menu'; state.settingsOpen = false; state.helpOpen = false; state.playPanel = null;
+  state.screen = 'menu'; state.settingsOpen = false; state.appearancePreview = null; state.helpOpen = false; state.playPanel = null;
   state.gameOver = false; invalidateScene();
 }
 function playChallenge(drag) {
@@ -1245,7 +1280,6 @@ wx.onTouchStart(event => {
   if (state.drag || levelScrollGesture || state.rewardBusy || gravityMode && gravityMode.touchId!==null) return;
   if (pressAnimation || sceneTransition) return;
   const point = pointOf(started);
-  if(state.screen==='gravity'){gravityMode.start(point,started.identifier,layout);return;}
 
   if (state.playPanel) {
     const actions=getPlayPanelActions(layout,state);
@@ -1280,7 +1314,10 @@ wx.onTouchStart(event => {
       const action = state.confirmAction;
       startPress('confirm-confirm', () => startSceneTransition(() => {
         state.confirmAction = null;
-        if (action === 'restart') restartGame();
+        if (action === 'restart' && state.screen === 'gravity') {
+          state.settingsOpen = false;
+          gravityMode.open(gravityMode.model.run.mode, true);
+        } else if (action === 'restart') restartGame();
         else returnHome();
       }), confirmActions.confirm, started.identifier);
     }
@@ -1299,6 +1336,31 @@ wx.onTouchStart(event => {
     } else if (!pointInRect(point, actions.panel)) {
       state.helpOpen = false;
       invalidateScene();
+    }
+    return;
+  }
+  if (state.appearancePreview) {
+    const actions = getAppearanceActions(layout);
+    const selected = Object.keys(actions.rows).find(id => pointInRect(point, actions.rows[id]));
+    if (selected) {
+      startPress('appearance-' + selected, () => {
+        state.appearancePreview = selected;
+        invalidateScene();
+      }, actions.rows[selected], started.identifier);
+    } else if (pointInRect(point, actions.use) && appearance.unlocked(state.appearancePreview, state.appearance)) {
+      startPress('appearance-use', () => {
+        if (state.appearance.selected !== state.appearancePreview) {
+          state.appearance.selected = state.appearancePreview;
+          persist(appearance.KEY, state.appearance);
+        }
+        state.appearancePreview = null;
+        invalidateScene();
+      }, actions.use, started.identifier);
+    } else if (pointInRect(point, actions.close)) {
+      startPress('appearance-close', () => {
+        state.appearancePreview = null;
+        invalidateScene();
+      }, actions.close, started.identifier);
     }
     return;
   }
@@ -1327,9 +1389,17 @@ wx.onTouchStart(event => {
       }, actions.vibration, started.identifier);
     } else if (pointInRect(point, actions.guide)) {
       startPress('settings-guide', () => {
-        state.helpOpen = true;
+        if (state.screen === 'gravity') {
+          state.settingsOpen = false;
+          gravityMode.model.rulesOpen = true;
+        } else state.helpOpen = true;
         invalidateScene();
       }, actions.guide, started.identifier);
+    } else if (pointInRect(point, actions.appearance)) {
+      startPress('settings-appearance', () => {
+        state.appearancePreview = state.appearance.selected;
+        invalidateScene();
+      }, actions.appearance, started.identifier);
     } else if (pointInRect(point, actions.feedback)) {
       // 原生按钮负责跳转；旧客户端和浏览器预览提供可执行的替代路径。
       if (!playerFeedback.available) startPress('settings-feedback', () => {
@@ -1354,6 +1424,17 @@ wx.onTouchStart(event => {
         invalidateScene();
       }, actions.close, started.identifier);
     }
+    return;
+  }
+  if (state.screen === 'gravity') {
+    const model = gravityMode.model;
+    if (!model.rulesOpen && !model.confirmRestart && pointInRect(point, getSettingsButton(layout))) {
+      startPress('settings', () => {
+        gravityMode.cancel();
+        state.settingsOpen = true;
+        invalidateScene();
+      }, getSettingsButton(layout), started.identifier);
+    } else gravityMode.start(point, started.identifier, layout);
     return;
   }
   if (state.screen === 'daily' || state.screen === 'invitation') {
@@ -1501,7 +1582,10 @@ wx.onTouchStart(event => {
     return;
   }
   if(state.mechanicGuide && pointInRect(point,mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip)) {
-    startPress('mechanic-skip',()=>dismissMechanicGuide('skip'),mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip,started.identifier);return;
+    startPress('mechanic-skip',()=>{
+      if(state.mechanicGuide.collapsed){state.mechanicGuide.collapsed=false;invalidateScene();}
+      else dismissMechanicGuide('skip');
+    },mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip,started.identifier);return;
   }
   const backButton = getBackButton(layout);
   if (pointInRect(point, backButton)) {
@@ -1555,6 +1639,7 @@ wx.onTouchStart(event => {
   }
 
   dragTouchId = started.identifier;
+  if(state.mechanicGuide)state.mechanicGuide.collapsed=true;
   state.drag = {
     trayIndex,
     shape,
@@ -1595,6 +1680,7 @@ wx.onTouchMove(event => {
     return;
   }
   if(state.screen==='gravity'){
+    if(state.settingsOpen || state.confirmAction)return;
     const touch=touchById(event.touches,gravityMode.touchId)||touchById(event.changedTouches,gravityMode.touchId);
     if(touch)gravityMode.move(pointOf(touch),layout);return;
   }
@@ -1627,6 +1713,7 @@ wx.onTouchEnd(event => {
     return;
   }
   if(state.screen==='gravity'){
+    if(state.settingsOpen || state.confirmAction)return;
     const touch=touchById(event.changedTouches,gravityMode.touchId);
     if(touch)gravityMode.end(pointOf(touch),layout);return;
   }

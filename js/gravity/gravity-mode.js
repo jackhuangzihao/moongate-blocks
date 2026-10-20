@@ -3,17 +3,20 @@ const view = require('./gravity-view');
 const storage = require('../persistence/storage');
 const analytics = require('../platform/analytics');
 const dragPlacement = require('../views/drag-placement');
+const { hasAnyPlacement } = require('../rules/board');
 const KEY = 'fangcunGravityV1';
 const DEMO_MODE = 2; // One move demonstrates clearing, falling and a chain.
 const inside = (point, rect) => rect && point.x >= rect.x && point.x <= rect.x + rect.width
   && point.y >= rect.y && point.y <= rect.y + rect.height;
 
 // Platform input and persistence stay separate from the pure rules and Canvas view.
-function create({ wx, invalidate, press, persist, feedback, leave }) {
+function create({ wx, invalidate, press, persist, feedback, leave, share }) {
   const model = {
-    run: null, drag: null, animation: null, completed: [], best: 0,
-    message: '', confirmRestart: false, rulesOpen: false, guideSeen: false, savePending: false
+    run: null, drag: null, animation: null, completed: [], best: 0, unavailableTray: [],
+    message: '', confirmRestart: false, rulesOpen: false, guideSeen: false, savePending: false, resultProgress: 1
   };
+  let resultStarted = null;
+  let startingBest = 0; // Session-only feedback baseline; persisted records keep their existing timing.
   const stored = storage.read(wx, KEY), runs = {};
   if (stored && stored.version === 1) {
     for (const mode of gravity.PUZZLES.map(puzzle => puzzle.id).concat('free')) {
@@ -26,6 +29,12 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
     }
     model.guideSeen = stored.guideSeen === true || model.completed.length > 0;
     if (Number.isSafeInteger(stored.best) && stored.best >= 0) model.best = stored.best;
+  }
+
+  // Derived UI state is refreshed only when the stable run changes, never saved.
+  function updateTrayAvailability() {
+    model.unavailableTray = model.run.tray.map(id => Boolean(id)
+      && !hasAnyPlacement(model.run.board, gravity.shape(id)));
   }
 
   function save() {
@@ -43,6 +52,7 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
   }
 
   function hide() {
+    resultStarted=null;model.resultProgress=1;
     cancel();
     if (model.animation) { model.animation = null; invalidate(); }
     model.confirmRestart = false;
@@ -51,14 +61,17 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
   }
 
   function open(mode = 'free', reset = false) {
+    resultStarted=null;model.resultProgress=1;
     cancel();
     model.animation = null;
     model.message = '';
     model.confirmRestart = false;
     model.rulesOpen = false;
+    startingBest = model.best;
     model.run = (!reset && gravity.restore(runs[mode]))
       || gravity.start(mode, mode === 'free' ? Math.floor(Math.random() * 4294967296) : 271828);
     if (model.run) {
+      updateTrayAvailability();
       save();
       analytics.report(wx, 'gravity_start', { mode: String(mode), resumed: Number(!reset && model.run.steps > 0) });
     }
@@ -78,10 +91,21 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
   }
 
   function resultSound() {
-    if (model.run && (model.run.won || model.run.over) && feedback.result) feedback.result(model.run.won);
+    const run = model.run;
+    if(run && (run.won || run.over) && (run.won || run.score>startingBest)){
+      resultStarted=Date.now();model.resultProgress=0;
+    }
+    if (run && (run.won || run.over) && feedback.result) {
+      feedback.result(run.won || (run.mode === 'free' && run.score > startingBest));
+    }
   }
 
   function step(now) {
+    if(resultStarted!==null){
+      model.resultProgress=Math.min(1,Math.max(0,(now-resultStarted)/750));
+      if(model.resultProgress===1)resultStarted=null;
+      invalidate();
+    }
     const animation = model.animation;
     if (!animation) return;
     while (animation.index < animation.frames.length) {
@@ -142,7 +166,9 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
       if (run.mode !== 'free') finishDemo(); else { hide(); leave(); }
     })) return;
     if (button(geometry.buttons.next, 'next', () => {
-      if (run.mode !== 'free') finishDemo(); else { cancel(); model.rulesOpen = true; invalidate(); }
+      if (run.mode !== 'free') finishDemo();
+      else if(run.over && share)share();
+      else { cancel(); model.rulesOpen = true; invalidate(); }
     })) return;
     if (run.mode !== 'free' && button(geometry.buttons.retry, 'retry', () => open(DEMO_MODE, true))) return;
     if (run.mode === 'free') {
@@ -160,6 +186,7 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
           return;
         }
         model.run = restored;
+        updateTrayAvailability();
         save();
         if (feedback.undoMove) feedback.undoMove();
         model.message = '已撤回 · 剩余 0 次';
@@ -169,7 +196,7 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
     if (model.animation || run.won || run.over) return;
     const slot = geometry.trays.findIndex(rect => inside(point, rect));
     if (slot < 0 || !run.tray[slot]) return;
-    model.message = '';
+    model.message = model.unavailableTray[slot] ? '暂时无处可放，先试试其他方块' : '';
     const shape = gravity.shape(run.tray[slot]);
     const bounds = {
       width: Math.max(...shape.cells.map(cell => cell[0])) + 1,
@@ -200,14 +227,17 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
     }
     // Commit the stable board before animation; interrupted frames never replay rewards.
     model.run = result.state;
+    updateTrayAvailability();
     if (model.run.mode !== 'free' && model.run.won) model.guideSeen = true;
     save();
-    if (feedback.placement) feedback.placement();
     model.message = '';
     if (result.frames.length) {
       model.animation = { frames: result.frames, index: 0, start: Date.now(), progress: 0, sounded: 0 };
       if (feedback.elimination) feedback.elimination(1, false, 1);
-    } else resultSound();
+    } else {
+      if (feedback.placement) feedback.placement();
+      resultSound();
+    }
     analytics.report(wx, 'gravity_move', {
       mode: String(model.run.mode), steps: model.run.steps, chain: model.run.chain,
       result: model.run.won ? 'win' : model.run.over ? 'over' : 'playing'
@@ -217,9 +247,9 @@ function create({ wx, invalidate, press, persist, feedback, leave }) {
 
   return {
     enter, open, save, hide, cancel, start, move: updateDrag, end, step, model,
-    draw(ctx, layout, pressed) {
+    draw(ctx, layout, pressed, appearanceId = 'classic') {
       model.savePending = storage.hasPending(wx);
-      view.draw(ctx, layout, model, pressed);
+      view.draw(ctx, layout, model, pressed, appearanceId);
     },
     get touchId() { return model.drag ? model.drag.touchId : null; }
   };

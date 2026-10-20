@@ -6,7 +6,8 @@ function createLayout(width, height, safeArea, menuButtonRect, mode = { rows: 9,
   const horizontalPadding = Math.max(20, width * 0.06);
   const settingsY = menuButtonRect && menuButtonRect.bottom ? menuButtonRect.bottom + 8 : safeTop + 58;
   const scoreY = settingsY + (height < 700 ? 72 : 82);
-  const baseBoardY = settingsY + (height < 700 ? 140 : 158) + 42;
+  // Keep the score/tools row and one goal card; compact screens give space back to cells.
+  const baseBoardY = settingsY + (height < 700 ? 136 : 174);
   const heightLimitedSize = Math.max(144, height - safeBottom - baseBoardY - 138);
   const cellSize = Math.min((width - horizontalPadding * 2) / mode.cols,
     Math.min(height * 0.54, heightLimitedSize) / mode.rows);
@@ -26,6 +27,7 @@ function createLayout(width, height, safeArea, menuButtonRect, mode = { rows: 9,
     boardHeight,
     cellSize,
     scoreY,
+    goalY: boardY - 48,
     energyY: boardY + boardHeight + 26,
     trayY: boardY + boardHeight + 84,
     traySlotWidth,

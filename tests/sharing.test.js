@@ -16,6 +16,20 @@ assert.equal(card.stars, 3); assert.equal(card.level, 5); assert.equal(card.stat
 const query = raw => Object.fromEntries(new URLSearchParams(raw));
 const invitation = { level: 4, rule: C.LEVELS[4].rule, benchmarkSteps: run.history.length };
 assert.deepStrictEqual(S.parseInvitation(query(card.query)), invitation);
+// Display numbering follows expanded chapter order; deep links keep stable stored IDs.
+const expandedRun=C.start(12);C.level(12).solution.forEach(move=>C.play(expandedRun,...move));
+for(const visible of [S.resultCard({...state,challenge:expandedRun}),S.menuCard({...state,gameOver:false,challenge:expandedRun})]){
+  assert.equal(visible.level,19);assert.ok(visible.heading.startsWith('第 19 关'));
+  assert.equal(query(visible.query).level,'13');
+  assert.equal(S.parseInvitation(query(visible.query)).level,12);
+}
+for(const dailyCard of [S.resultCard({...state,challenge:{...expandedRun,dailyDate:'2026-10-03'}}),S.menuCard({...state,gameOver:false,challenge:{...expandedRun,dailyDate:'2026-10-03'}})]){
+  assert.equal(dailyCard.level,null,'Daily art has no chapter number');
+  const artLabels=[],artCtx=new Proxy({}, {get:(_,key)=>key==='fillText'?value=>artLabels.push(String(value)):()=>{}});
+  S.drawCard(artCtx,dailyCard);
+  assert.ok(artLabels.includes('✓'));
+  assert.ok(!artLabels.some(label=>/^\d+$/.test(label)),'Daily path nodes do not leak internal IDs');
+}
 const labels = [], calls = [], notices = [];
 const ctx = new Proxy({}, { get: (_, k) => k === 'fillText' ? text => labels.push(text) : () => {} });
 S.drawCard(ctx, card); assert.ok(labels.includes(`第 5 关 · ${C.LEVELS[4].title}`)); assert.ok(labels.includes(`${run.history.length} 步通关`));
@@ -125,3 +139,34 @@ assert.equal(query(S.menuCard({ screen: 'playing', challenge: { ...dedicated, be
 assert.deepStrictEqual(S.parseInvitation({ ...dedicatedQuery, steps: '01' }), { level: -1, rule: C.level(-1).rule, dailyDate: dedicatedDate });
 assert.equal({}.benchmarkSteps, undefined, 'parsing and forwarding never pollute object prototypes');
 console.log('PASS: optional bounded benchmark, old-link compatibility, personal result forwarding and same-puzzle comparison');
+
+// Gravity shares describe the mode, never another garden's score or a chapter.
+const gravityCard=S.menuCard({...state,screen:'gravity',score:999,bestScores:{easy:999},challenge:run});
+assert.equal(gravityCard.heading,'方寸九宫 · 落玉庭');
+assert.ok(!gravityCard.title.includes('999'));assert.ok(!gravityCard.stat.includes('999'));
+assert.deepStrictEqual(S.parseInvitation(query(gravityCard.query)),{mode:'gravity'});
+labels.length=0;S.drawCard(ctx,gravityCard);
+assert.ok(labels.includes('方寸九宫 · 落玉庭'));
+assert.ok(!labels.some(t=>String(t).includes('清雅庭院 /')));
+menuState={...state,screen:'gravity'};failExport=true;
+assert.equal(appShare().query,'mode=gravity');assert.equal(timelineShare().query,'mode=gravity');
+assert.ok(appShare().title.includes('落玉庭'));
+for(const bad of [{mode:['gravity']},{mode:'unknown'},{mode:'gravity',challenge:'1'},{mode:'gravity',level:'1'},
+  {mode:'gravity',daily:'2026-10-16'},Object.create({mode:'gravity'}),JSON.parse('{"mode":"gravity","__proto__":{}}')])assert.equal(S.parseInvitation(bad),null);
+assert.deepStrictEqual(S.parseInvitation({mode:'gravity',score:'999',reward:'999'}),{mode:'gravity'});
+console.log('PASS: gravity share title/image labels, timeline, export fallback and isolated entry query');
+
+// Challenge phrasing uses the player's actual result; help links keep initial-board semantics.
+assert.ok(card.title.includes(`${run.history.length} 步`));
+assert.ok(card.title.includes('更少'));
+assert.ok(!S.resultCard({...state,score:120,startingBest:300}).title.includes('纪录'));
+const failure=C.start(12);failure.ended=true;
+const help=S.helpCard({...state,challenge:failure});
+assert.ok(help.title.includes(`第 ${C.level(12).number} 关`));
+assert.ok(help.detail.includes('初始棋盘'));
+assert.equal(S.parseInvitation(query(help.query)).help,true);
+const gravityResult=S.resultCard({...state,screen:'gravity',gravityResult:{score:3800,chain:4,over:true}});
+assert.equal(gravityResult.stat,'3800 分');assert.ok(gravityResult.title.includes('4 连锁'));
+assert.deepStrictEqual(S.parseInvitation(query(gravityResult.query)),{mode:'gravity'});
+assert.equal(S.resultCard({...state,screen:'gravity',gravityResult:{score:3800,chain:4,over:false}}),null);
+console.log('PASS: actual-result challenge copy, initial-board help and gravity result sharing');

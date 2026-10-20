@@ -1,0 +1,206 @@
+{
+  "width": 1080,
+  "height": 1920,
+  "fps": 60,
+  "seconds": 18,
+  "firstClearSeconds": 0.43,
+  "modes": [
+    "自由消除",
+    "目标闯关"
+  ],
+  "extraGameplay": "落玉庭下落连锁",
+  "voice": "第一人称画面字幕；无合成口播",
+  "scenes": [
+    {
+      "from": 0,
+      "to": 2,
+      "content": "开发者自述＋高密度重力连锁钩子"
+    },
+    {
+      "from": 2,
+      "to": 6,
+      "content": "自由消除，连续合法落子"
+    },
+    {
+      "from": 6,
+      "to": 10,
+      "content": "目标闯关，第4关双晴＋第55关初蕊"
+    },
+    {
+      "from": 10,
+      "to": 16,
+      "content": "落玉庭，三次独立的消除/下落/再次消除"
+    },
+    {
+      "from": 16,
+      "to": 18,
+      "content": "双模式＋额外玩法回顾、游戏名"
+    }
+  ],
+  "verified": {
+    "gardenLegalMoves": 4,
+    "crossWins": true,
+    "flowerWins": true,
+    "gravityChains": [
+      2,
+      2,
+      2
+    ],
+    "denseRegionsCleared": 13,
+    "sourceGravityRenderer": true
+  },
+  "audioEvents": [
+    {
+      "time": 2.48,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1
+    },
+    {
+      "time": 3.48,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1.04
+    },
+    {
+      "time": 4.48,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1.08
+    },
+    {
+      "time": 5.45,
+      "id": "clear",
+      "gain": 0.7,
+      "rate": 1.12
+    },
+    {
+      "time": 6.53,
+      "id": "place",
+      "gain": 0.5,
+      "rate": 1
+    },
+    {
+      "time": 7.23,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1.045
+    },
+    {
+      "time": 8.52,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1
+    },
+    {
+      "time": 8.99,
+      "id": "place",
+      "gain": 0.5,
+      "rate": 1.045
+    },
+    {
+      "time": 9.45,
+      "id": "combo",
+      "gain": 0.72,
+      "rate": 1.09
+    },
+    {
+      "time": 9.549999999999999,
+      "id": "bloom",
+      "gain": 0.65,
+      "rate": 1
+    },
+    {
+      "time": 0.43,
+      "id": "clear",
+      "gain": 0.83,
+      "rate": 1
+    },
+    {
+      "time": 0.63,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 1.07,
+      "id": "combo",
+      "gain": 0.83,
+      "rate": 1.16
+    },
+    {
+      "time": 1.27,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 10.52,
+      "id": "clear",
+      "gain": 0.83,
+      "rate": 1
+    },
+    {
+      "time": 10.719999999999999,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 11.159999999999998,
+      "id": "combo",
+      "gain": 0.83,
+      "rate": 1.16
+    },
+    {
+      "time": 12.52,
+      "id": "clear",
+      "gain": 0.83,
+      "rate": 1
+    },
+    {
+      "time": 12.719999999999999,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 13.159999999999998,
+      "id": "combo",
+      "gain": 0.83,
+      "rate": 1.16
+    },
+    {
+      "time": 13.359999999999998,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 14.52,
+      "id": "clear",
+      "gain": 0.83,
+      "rate": 1
+    },
+    {
+      "time": 14.719999999999999,
+      "id": "fall",
+      "gain": 0.34,
+      "rate": 1
+    },
+    {
+      "time": 15.159999999999998,
+      "id": "combo",
+      "gain": 0.83,
+      "rate": 1.16
+    }
+  ],
+  "sourceHashes": {
+    "js/config.js": "5c48b21a8e554faa8db2bf1ae1631de72a3cd13f30461898c2d1f6ec13431c22",
+    "js/rules/board.js": "c118e02ecbe9e9c01e15a30e8805f81ba5c0f3126da47c9e1c93d66518fb923b",
+    "js/challenge/challenges.js": "bc841fbc0af104aa6c24c954a4124619443a30f698aa1ddf8fd0c2cb574506c3",
+    "js/views/board-view.js": "b49de6f7637a5f83fabeae16fe94990bdfaf24df2ae4067b2f0bc57f0f04b5d9",
+    "js/gravity/gravity-engine.js": "2ee1342aae135d440c7ca635b6fbe4d746ad584c26d113d719aeaa8b694dfc79",
+    "js/gravity/gravity-view.js": "f7859c458e9b0da46c7263cbf0b09afa9aa6bdb97c1a0f903ddf02cac0289139"
+  }
+}

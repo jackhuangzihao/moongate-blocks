@@ -42,6 +42,10 @@ function experienced(guide, run, result, oldProgress) {
   }
 }
 function rects(layout, guide, run) {
+  if(guide.collapsed){
+    const x=layout.horizontalPadding,width=layout.width-x*2,y=layout.goalY;
+    return {panel:{x,y,width,height:44},skip:{x:x+width-56,y,width:56,height:44}};
+  }
   const width=Math.min(330,layout.width-40);
   const next=move(guide,run),row=next?next.r:guide.cell[1];
   const rows=next?Math.max(...run.tray[next.slot].cells.map(p=>p[1]))+1:1;

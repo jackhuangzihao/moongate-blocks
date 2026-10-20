@@ -7,6 +7,7 @@ const basics = require('../progression/basics');
 const sharing = require('../platform/sharing');
 const { roundedRect, text, pressedRect, button, drawSettingsIcon, wrapText } = require('./canvas-ui');
 const { drawFlower, drawKey, drawGate } = require('./board-symbols');
+const themes = require('./themes');
 
 const { focusForState: collectionFocus, growthForState: gardenGrowth } = collection;
 const MENU_CARD_GAP = 12;
@@ -26,7 +27,7 @@ function getHomeActions(layout) {
     target:{x,y:bottom-248,width,height:69},
     ranking:{x,y:bottom-48,width:width-64,height:44},settings:{x:x+width-48,y:bottom-48,width:48,height:44},
     // 庭院首页的插画连同下面那行字，一起作为"我的庭院"入口。
-    collection:{x,y:layout.settingsY+126,width,height:Math.max(0,bottom-252-layout.settingsY-126)}
+    collection:{x,y:layout.settingsY+(layout.height<700?108:126),width,height:Math.max(0,bottom-252-layout.settingsY-(layout.height<700?108:126))}
   };
 }
 
@@ -34,7 +35,8 @@ function getBackButton(layout) { return {x:12,y:layout.settingsY,width:64,height
 
 function getSpecialActions(layout) {
   const width=Math.min(330,layout.width-48);
-  return {start:{x:(layout.width-width)/2,y:layout.height-layout.safeBottom-92,width,height:50}};
+  const y=Math.min(layout.height-layout.safeBottom-92,layout.settingsY+560);
+  return {start:{x:(layout.width-width)/2,y,width,height:50}};
 }
 
 function drawSpecial(ctx,layout,state) {
@@ -46,10 +48,11 @@ function drawSpecial(ctx,layout,state) {
   const width=action.width,x=action.x,records=state.dailyProgress?state.dailyProgress.records:[];
   const record=isDaily&&records.find(item=>item.date===date && item.level===id && item.rule===level.rule);
   const saved=isDaily&&state.dailyProgress.active&&state.dailyProgress.active.date===date;
-  text(ctx,'‹ 返回',44,top+30,13);
+  button(ctx,{...getBackButton(layout),height:32},'‹ 返回',false,state,'special-back',13);
   text(ctx,isDaily?'每日精选':state.invitation.help?'朋友请你看看':'好友邀你挑战',center,top+31,20,COLORS.text,'center','600');
   text(ctx,isDaily?`${date} · 同日同题`:state.invitation.dailyDate?`${state.invitation.dailyDate} · 独立试玩`:`第 ${challenges.level(id).number} 关 · 独立试玩`,center,top+57,12,COLORS.secondaryText);
-  const size=Math.max(78,Math.min(150,action.y-top-228)),boardX=center-size/2,boardY=top+74,cell=size/9;
+  const size=Math.max(78,Math.min(layout.height<700?150:210,action.y-top-252)),boardX=center-size/2;
+  const boardY=top+74+Math.max(0,Math.min(48,(action.y-top-size-252)/2)),cell=size/9;
   const preview=challenges.start(id);
   ctx.fillStyle=COLORS.panel;roundedRect(ctx,boardX-5,boardY-5,size+10,size+10,10);ctx.fill();
   preview.board.forEach((row,r)=>row.forEach((v,c)=>{
@@ -61,7 +64,7 @@ function drawSpecial(ctx,layout,state) {
   for(const gate of preview.gates || [])for(const [c,r] of gate.cells)drawGate(ctx,boardX+c*cell+1,boardY+r*cell+1,cell-2,gate.id);
   for(const [c,r,id] of preview.keys || [])drawKey(ctx,boardX+c*cell+1,boardY+r*cell+1,cell-2,id,preview.ice.some(p=>p[0]===c&&p[1]===r));
   if(level.area){
-    ctx.save();ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=1;ctx.setLineDash([2,2]);
+    ctx.save();ctx.strokeStyle=COLORS.accent;ctx.lineWidth=1;ctx.setLineDash([2,2]);
     level.area.forEach(([c,r])=>{roundedRect(ctx,boardX+c*cell+1,boardY+r*cell+1,cell-2,cell-2,2);ctx.stroke();});ctx.restore();
   }
   preview.stones.forEach(([c,r])=>{
@@ -135,6 +138,7 @@ function getGravityEntry(layout) {
 }
 
 function drawModeCard(ctx, rect, mode, best, state) {
+  mode = themes.modeCard(mode, state);
   const buttonId = mode.buttonId || `pick-${mode.id}`;
   const pressed = state.pressedButton === buttonId;
   rect = pressedRect(state, buttonId, rect);
@@ -185,29 +189,31 @@ function drawHomeBoard(ctx,rect,progress=0) {
   }
   ctx.strokeStyle=COLORS.palaceLine;ctx.lineWidth=1;
   for(let i=0;i<9;i++){roundedRect(ctx,x+i%3*cell*3,y+Math.floor(i/3)*cell*3,cell*3,cell*3,3);ctx.stroke();}
-  ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=2;
+  ctx.strokeStyle=COLORS.accent;ctx.lineWidth=2;
   roundedRect(ctx,x+3*cell,y+3*cell,3*cell,3*cell,3);ctx.stroke();
   const tx=x+size+14,tw=rect.width-size-20;
   text(ctx,'9×9 方块消除',tx,y+size*.22,13,COLORS.text,'left','600');
   wrapText(ctx,progress>=.75?'填满九宫 → 消除':'填满行、列或 3×3 九宫',tx,y+size*.48,tw,12);
-  text(ctx,'拖动方块，试一次 ›',tx,y+size*.9,11,COLORS.primaryButton,'left');
+  text(ctx,'拖动方块，试一次 ›',tx,y+size*.9,11,COLORS.accent,'left');
 }
 
 function drawMenu(ctx,layout,state) {
   const a=getHomeActions(layout),challenge=state.homeMode==='challenge',center=layout.width/2;
   const first=basics.isNew(state);
   button(ctx,a.garden,'自由消除',!challenge,state,'home-garden');button(ctx,a.challenge,'目标闯关',challenge,state,'home-challenge');
-  const titleY=a.garden.y+87;
+  const compact=layout.height<700,titleY=a.garden.y+(compact?76:87);
   ctx.textAlign='center';ctx.fillStyle=COLORS.text;
   ctx.font=challenge?'700 32px sans-serif':'500 34px serif';ctx.fillText('方寸九宫',center,titleY);
-  text(ctx,challenge?'限定步数完成目标，通关后再争三星':'拖动方块，填满行、列或九宫即可消除',center,titleY+26,13,COLORS.secondaryText);
-  const artY=titleY+39,featureY=a.start.y-84,artHeight=Math.max(36,Math.min(215,featureY-artY-32));
+  text(ctx,challenge?'限定步数完成目标，通关后再争三星':'拖动方块，填满行、列或九宫即可消除',center,titleY+(compact?23:26),13,COLORS.secondaryText);
+  const featureY=a.start.y-84,artTop=titleY+(compact?32:39);
+  const availableHeight=featureY-artTop-(compact?24:32),artHeight=Math.max(36,Math.min(215,availableHeight));
+  const artY=artTop+Math.max(0,(availableHeight-artHeight)/2);
   const progress=state.challengeProgress,active=progress.active;
   const levelId=active?active.level:challenges.unlocked(progress),level=challenges.level(levelId);
   const artWidth=Math.min(290,artHeight*1.65);
   const focus=collectionFocus(state);
   if(challenge){
-    art.path(ctx,{x:center-artWidth/2,y:artY,width:artWidth,height:artHeight},levelId+1);
+    art.path(ctx,{x:center-artWidth/2,y:artY,width:artWidth,height:artHeight},level.number);
     if(focus)text(ctx,focus.text,center,featureY-12,12,COLORS.secondaryText);
   }
   else if(first) {
@@ -221,10 +227,10 @@ function drawMenu(ctx,layout,state) {
     text(ctx,fresh.length?`庭院新添：${fresh.slice(0,2).map(collection.named).join('、')}${fresh.length>2?` 等 ${fresh.length} 件`:''} ›`
       :growing && growing.have>0 && !growing.complete?`${growing.item.name} · ${growing.label} · ${growing.progress} ›`:chosen?`我的庭院 · 已添 ${owned.length} / ${collection.ITEMS.length} 件 ›`:focus?focus.text+' ›':owned.length?`我的庭院 · 已添 ${owned.length} / ${collection.ITEMS.length} 件 ›`
       :`我的庭院 · 再消除 ${upcoming.missing} 次可添「${upcoming.item.name}」 ›`,
-      center,Math.min(featureY-10,artY+artHeight/2+95*Math.min(artWidth/300,artHeight/190)+17),12,fresh.length?COLORS.primaryButton:COLORS.secondaryText,'center',fresh.length?'600':'400');
+      center,Math.min(featureY-10,artY+artHeight/2+95*Math.min(artWidth/300,artHeight/190)+17),12,fresh.length?COLORS.accent:COLORS.secondaryText,'center',fresh.length?'600':'400');
   }
   ctx.fillStyle=COLORS.panel;roundedRect(ctx,a.start.x,featureY,a.start.width,69,16);ctx.fill();
-  if(state.pressedButton==='home-target'){ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=2;ctx.stroke();}
+  if(state.pressedButton==='home-target'){ctx.strokeStyle=COLORS.accent;ctx.lineWidth=2;ctx.stroke();}
   const saved=state.savedGames[state.freeMode],allDone=progress.stars.every(n=>n>0);
   const chapter=progress.chapter||0,chapterDone=challenges.chapterLevels(chapter).every(level=>progress.stars[level.id]);
   const target=!challenge&&collection.target(state.collection,collection.totalStars(progress));
@@ -245,11 +251,11 @@ function drawMenu(ctx,layout,state) {
   const done=state.dailyProgress && state.dailyProgress.records.some(item=>item.date===state.today);
   button(ctx,a.daily,done?'今日已完成 ✓':'每日精选 ›',false,state,'home-daily');
   text(ctx,challenge?`已收集 ${progress.stars.reduce((a,b)=>a+b,0)} / ${challenges.LEVELS.length*3} 颗星`:'查看庭院好友排行 ›',a.ranking.x+a.ranking.width/2,a.ranking.y+28,12,COLORS.secondaryText);
-  drawSettingsIcon(ctx,a.settings,COLORS.secondaryText);
+  drawSettingsIcon(ctx,pressedRect(state,'home-settings',a.settings),COLORS.secondaryText);
 }
 
 function drawPicker(ctx,layout,state) {
-  text(ctx,'‹ 返回',44,layout.settingsY+30,13);
+  button(ctx,{...getBackButton(layout),height:32},'‹ 返回',false,state,'picker-back',13);
   text(ctx,state.screen==='maps'?'选择棋盘':'闯关地图',layout.width/2,layout.settingsY+31,20,COLORS.text,'center','600');
   if(state.screen==='maps'){
     const actions=getMenuActions(layout);
@@ -263,13 +269,19 @@ function drawPicker(ctx,layout,state) {
     const view=getLevelViewport(layout,chapter),offset=Math.max(0,Math.min(view.maxScroll,state.levelScroll||0));
     const actions=getLevelActions(layout,chapter,offset);
     ctx.save();ctx.beginPath();ctx.rect(view.x,view.y,view.width,view.height);ctx.clip();
+    const next=challenges.unlocked(state.challengeProgress,chapter);
     challenges.chapterLevels(chapter).forEach(level=>{
       if(actions[level.id].y+actions[level.id].height<=view.y || actions[level.id].y>=view.y+view.height)return;
       const i=level.id,r=pressedRect(state,`pick-${i}`,actions[i]),locked=!challenges.isUnlocked(state.challengeProgress,i),earned=state.challengeProgress.stars[i];
       ctx.globalAlpha=locked?.48:1;ctx.fillStyle=COLORS.panel;roundedRect(ctx,r.x,r.y,r.width,r.height,15);ctx.fill();
-      text(ctx,locked?'未解锁':String(level.number).padStart(2,'0'),r.x+r.width/2,r.y+(r.height<75?20:24),locked?11:20,COLORS.text,'center','600');
+      ctx.globalAlpha=1;
+      if(i===next && !earned){
+        ctx.strokeStyle=COLORS.accent;ctx.lineWidth=1.5;
+        roundedRect(ctx,r.x+1,r.y+1,r.width-2,r.height-2,14);ctx.stroke();
+      }
+      text(ctx,String(level.number).padStart(2,'0'),r.x+r.width/2,r.y+(r.height<75?20:24),20,COLORS.text,'center','600');
       text(ctx,level.title,r.x+r.width/2,r.y+(r.height<75?39:43),12,COLORS.secondaryText);
-      if(r.height>61)text(ctx,earned?'★'.repeat(earned)+'☆'.repeat(3-earned):locked?'':'先完成目标',r.x+r.width/2,r.y+(r.height<75?56:62),11,COLORS.energyText);
+      if(r.height>61)text(ctx,earned?'★'.repeat(earned)+'☆'.repeat(3-earned):locked?'未解锁':'可挑战',r.x+r.width/2,r.y+(r.height<75?56:62),11,COLORS.energyText);
       ctx.globalAlpha=1;
     });
     ctx.restore();
@@ -286,10 +298,10 @@ function drawPicker(ctx,layout,state) {
 
 function collectionLayout(layout) {
   const width=Math.min(330,layout.width-48),x=(layout.width-width)/2;
-  const bottom=layout.height-layout.safeBottom-24,cardHeight=66,gap=10;
+  const compact=layout.height<700,bottom=layout.height-layout.safeBottom-24,cardHeight=compact?62:66,gap=compact?8:10;
   const artTop=layout.settingsY+64;
-  const artHeight=Math.max(30,Math.min(205,bottom-artTop-322)),artWidth=Math.min(width,artHeight*300/190);
-  const tabsY=artTop+artHeight+12,cardsY=tabsY+72;
+  const artHeight=Math.max(30,Math.min(205,bottom-artTop-(compact?300:322))),artWidth=Math.min(width,artHeight*300/190);
+  const tabsY=artTop+artHeight+12,cardsY=tabsY+(compact?66:72);
   return {width,x,bottom,cardHeight,gap,artTop,artHeight,artWidth,tabsY,cardsY};
 }
 
@@ -313,7 +325,7 @@ function drawCollection(ctx,layout,state) {
   const actions=getCollectionActions(layout,track.id),tabs=getCollectionTabs(layout);
   const stars=collection.totalStars(state.challengeProgress);
   const growing=gardenGrowth(state);
-  text(ctx,'‹ 返回',44,layout.settingsY+30,13);
+  button(ctx,{...getBackButton(layout),height:32},'‹ 返回',false,state,'picker-back',13);
   text(ctx,'我的庭院',center,layout.settingsY+31,20,COLORS.text,'center','600');
   text(ctx,`已添 ${collection.unlocked(state.collection,stars).length} / ${collection.ITEMS.length} 件 · 未解锁可选为目标`,center,layout.settingsY+53,12,COLORS.secondaryText);
   art.garden(ctx,{x:center-artWidth/2,y:artTop,width:artWidth,height:artHeight},state.decor,state.collectionReveal,gardenGrowth(state));
@@ -323,9 +335,10 @@ function drawCollection(ctx,layout,state) {
     const rect=pressedRect(state,'decor-'+item.id,actions[item.id]);
     const have=collection.amount(item,state.collection,stars),got=have>=item.need;
     ctx.fillStyle=COLORS.panel;roundedRect(ctx,rect.x,rect.y,rect.width,rect.height,12);ctx.fill();
-    if(!got && state.collection.target===item.id){ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=2;ctx.stroke();text(ctx,'目标',rect.x+rect.width-10,rect.y+22,10,COLORS.primaryButton,'right','600');}
+    if(!got && state.collection.target===item.id){ctx.strokeStyle=COLORS.accent;ctx.lineWidth=2;ctx.stroke();}
+    if(!got)text(ctx,state.collection.target===item.id?'当前目标':'设为目标',rect.x+rect.width-10,rect.y+22,10,COLORS.accent,'right');
     text(ctx,item.name,rect.x+10,rect.y+22,14,got?COLORS.text:COLORS.secondaryText,'left','600');
-    text(ctx,got?(state.decor.includes(item.id)?'已摆放 · 点击收起':'已收起 · 点击摆放'):collection.requirement(item,state.collection,stars),rect.x+10,rect.y+44,10,got?COLORS.primaryButton:COLORS.secondaryText,'left');
+    text(ctx,got?(state.decor.includes(item.id)?'已摆放 · 点击收起':'已收起 · 点击摆放'):collection.requirement(item,state.collection,stars),rect.x+10,rect.y+44,10,got?COLORS.accent:COLORS.secondaryText,'left');
     if(!got){
       ctx.fillStyle=COLORS.emptyCell;roundedRect(ctx,rect.x+10,rect.y+rect.height-9,rect.width-20,3,1.5);ctx.fill();
       ctx.fillStyle=COLORS.primaryButton;roundedRect(ctx,rect.x+10,rect.y+rect.height-9,Math.max(3,(rect.width-20)*have/item.need),3,1.5);ctx.fill();

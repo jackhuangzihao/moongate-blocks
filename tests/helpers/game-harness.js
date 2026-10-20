@@ -7,7 +7,7 @@ function boot(store = {}, options = {}) {
   const handlers = {}, notices = [], events = [], labels = [], clock = options.clock || { value: Date.parse('2026-10-03T04:00:00Z') };
   const size = options.size || { w: 390, h: 844 };
   const fault = options.fault || {}, ctx = new Proxy({}, { get: (o, k) => k === 'fillText'
-    ? (value, x, y) => labels.push({ text: String(value), x, y, font: o.font, align: o.textAlign })
+    ? (value, x, y) => labels.push({ text: String(value), x, y, font: o.font, align: o.textAlign, color: o.fillStyle, alpha: o.globalAlpha === undefined ? 1 : o.globalAlpha })
     : o[k] || (() => {}), set: (o, k, v) => (o[k] = v, true) });
   const wx = { getWindowInfo: () => ({ windowWidth: size.w, windowHeight: size.h }), createCanvas: () => ({ getContext: () => ctx }),
     getStorageSync: key => store[key] === undefined ? undefined : clone(store[key]),
@@ -16,7 +16,12 @@ function boot(store = {}, options = {}) {
     reportEvent: (event, data) => events.push([event, clone(data)]) };
   for (const name of ['TouchStart', 'TouchMove', 'TouchEnd', 'TouchCancel', 'Hide', 'Show']) wx['on' + name] = f => handlers[name] = f;
   Object.assign(wx,options.api || {});
-  const feedback = { settings: {}, playMusic() {}, placement() {}, elimination() {}, resume() {}, suspend() {}, undoMove() {}, iceBreak() {}, result() {} };
+  let feedback = { settings: {}, playMusic() {}, placement() {}, elimination() {}, resume() {}, suspend() {}, undoMove() {}, iceBreak() {}, result() {} };
+  if (options.realFeedback) {
+    const file = path.resolve(__dirname, '../../js/platform/feedback.js'), module = { exports: {} };
+    vm.runInNewContext(fs.readFileSync(file, 'utf8'), { wx, module, require: createRequire(file) });
+    feedback = module.exports;
+  }
   const math = Object.create(Math);
   if (options.random) math.random = options.random;
   const sandbox = vm.createContext({ wx, Math: math, requestAnimationFrame() {}, require: name => name === './js/platform/feedback' ? feedback

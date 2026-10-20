@@ -184,7 +184,7 @@ assert.ok(!repeated.draw().some(t=>t.s==='本关分数'),'challenge header prior
 for(const [slot,c,r] of [[1,0,0],[2,2,0],[0,0,2],[0,5,0]])repeated.drop(slot,c,r);
 assert.equal(repeated.run('state.challengeProgress.fails[0]'),1);
 assert.ok(repeated.draw().some(t=>t.s==='整行还差 1 行'),'failure explains the remaining goal');
-assert.ok(repeated.draw().some(t=>t.s==='步数已用完，目标还未完成'));
+assert.ok(repeated.draw().some(t=>t.s==='已用 4 / 4 步 · 步数已用完'));
 repeated.run('undoMove(1)');repeated.drop(0,5,0);
 const exhaustedFailure=clone(repeated.run('state.challenge'));repeated.run('undoMove(1)');
 assert.deepStrictEqual(clone(repeated.run('state.challenge')),exhaustedFailure);
@@ -207,6 +207,11 @@ goalUi.drop(...C.LEVELS[28].solution[0]);
 assert.ok(goalUi.draw().some(t=>t.s===`${remaining()} 格`));
 goalUi.run('undoMove(1)');assert.equal(remaining(),beforeGoal);
 assert.ok(goalUi.draw().some(t=>t.s===`${beforeGoal} 格`));
+// After transient feedback, the compact goal card returns to the star budget.
+assert.ok(goalUi.draw().some(t=>t.s.startsWith('已退回 1 步')));
+goalUi.run('stepAnimations(Date.now()+5000)');
+assert.ok(goalUi.draw().some(t=>t.s==='消除虚线内的所有方块'),'Rule guidance takes priority while open');
+goalUi.tap(goalUi.run('mechanicGuide.rects(layout,state.mechanicGuide,state.challenge).skip'));
 // A spent three-star budget still allows finishing within the level's full limit.
 goalUi.run('state.challenge.history=Array(challenges.LEVELS[28].par).fill({})');
 assert.ok(goalUi.draw().some(t=>t.s==='仍可通关 · 重玩可再争三星'));
@@ -228,9 +233,9 @@ console.log('Retention checks: first-clear tutorial/relaunch, ranked-score isola
 
 // Strategy cue follows the live board, without placing a suggested move or changing energy.
 const energyCue=boot({fangcunTutorialSeen:true});energyCue.run('continueOrStartGame();state.board=state.board.map(row=>row.map(()=>0));state.energyPalaces=[0];for(let r=0;r<2;r++)for(let c=0;c<3;c++)state.board[r][c]=1;state.board[2][0]=1;clearFeedback()');
-assert.ok(energyCue.draw().some(t=>t.s==='描金九宫还差 2 格 · 填满可充能'));
-energyCue.run('state.board[2][1]=1');assert.ok(energyCue.draw().some(t=>t.s==='描金九宫还差 1 格 · 填满可充能'));
-energyCue.run('state.board=state.board.map(row=>row.map(()=>0))');assert.ok(!energyCue.draw().some(t=>t.s.includes('描金九宫')));
+assert.ok(energyCue.draw().some(t=>t.s==='充能九宫还差 2 格 · 填满可充能'));
+energyCue.run('state.board[2][1]=1');assert.ok(energyCue.draw().some(t=>t.s==='充能九宫还差 1 格 · 填满可充能'));
+energyCue.run('state.board=state.board.map(row=>row.map(()=>0))');assert.ok(!energyCue.draw().some(t=>t.s.includes('充能九宫')));
 
 // Newly earned decor animates once on opening; idle and revisits do not keep redrawing.
 const reveal=boot({[K.KEY]:{version:1,clears:20,seen:[],hidden:[]}});
@@ -244,7 +249,10 @@ for(const size of [{w:320,h:568},{w:390,h:844}]){
  assert.ok(flowers.draw().some(t=>t.s==='2'),'new flower shows two waterings');
  assert.ok(flowers.draw().some(t=>t.s==='每次浇灌一次，数字归零就开花'));
  flowers.run('dismissMechanicGuide("skip")');
- assert.ok(flowers.draw().some(t=>t.s==='上下左右消除浇灌 · 数字归零开花'));
+ assert.ok(flowers.draw().some(t=>t.s==='先完成目标 · 通关后可再争三星'));
+ flowers.tap(flowers.run('getGoalAction(layout)'));
+ assert.ok(flowers.draw().some(t=>t.s==='在花圃上下左右消除，每次浇灌一次。'),'Full rules stay accessible from the goal card');
+ flowers.tap(flowers.run('getPlayPanelActions(layout,state).confirm'));
  for(const move of C.LEVELS[36].solution){
   flowers.drop(...move);
   if(flowers.run('state.challenge.flowers[0][2]')===1){assert.ok(flowers.draw().some(t=>t.s==='1'));break;}

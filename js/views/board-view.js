@@ -89,7 +89,7 @@ function drawBoard(ctx, layout, state) {
     (state.challenge.flowers || []).forEach(([c,r,remaining])=>drawFlower(ctx,boardX+c*cellSize+3,boardY+r*cellSize+3,cellSize-6,remaining));
     const area=challenges.level(state.challenge.level).area || [];
     if(area.length){
-      ctx.save();ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=1.5;ctx.setLineDash([3,2]);
+      ctx.save();ctx.strokeStyle=COLORS.accent;ctx.lineWidth=1.5;ctx.setLineDash([3,2]);
       area.forEach(([c,r])=>{roundedRect(ctx,boardX+c*cellSize+2,boardY+r*cellSize+2,cellSize-4,cellSize-4,3);ctx.stroke();});
       ctx.restore();
     }
@@ -116,7 +116,7 @@ function drawBoard(ctx, layout, state) {
     for(const [c,r,id] of state.challenge.keys || [])
       drawKey(ctx,boardX+c*cellSize+3,boardY+r*cellSize+3,cellSize-6,id,state.challenge.ice.some(p=>p[0]===c&&p[1]===r));
     if (state.challenge.level>=0 && state.challenge.level<3 && !state.piecesPlaced && !state.drag) {
-      ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=1.5;
+      ctx.strokeStyle=COLORS.accent;ctx.lineWidth=1.5;
       if(ctx.setLineDash)ctx.setLineDash([3,3]);
       challenges.level(state.challenge.level).holes.forEach(([c,r])=>{
         roundedRect(ctx,boardX+c*cellSize+3,boardY+r*cellSize+3,cellSize-6,cellSize-6,3);ctx.stroke();
@@ -156,11 +156,6 @@ function drawBoard(ctx, layout, state) {
     ctx.fillText('✦', centerX, centerY + cellSize * 0.17);
   });
   ctx.globalAlpha = 1;
-  const near=nearbyEnergy(state);
-  if(near){
-    ctx.strokeStyle=COLORS.energyText;ctx.lineWidth=2;
-    roundedRect(ctx,boardX+near.c*cellSize+1,boardY+near.r*cellSize+1,cellSize*3-2,cellSize*3-2,7);ctx.stroke();
-  }
 }
 
 function drawBlocked(ctx, layout, state) {
@@ -295,9 +290,9 @@ function drawPlacementPreview(ctx, layout, state) {
     if(preview.openedGates.length)notes.push(`开启 ${[...new Set(preview.openedGates.map(p=>p[2]))].join('、')} 机关`);
     if(preview.bloomedFlowers.length)notes.push(`${preview.bloomedFlowers.length} 处开花`);
     if(preview.wateredFlowers.length>preview.bloomedFlowers.length)notes.push(`浇灌 ${preview.wateredFlowers.length-preview.bloomedFlowers.length} 处`);
-    const x=layout.horizontalPadding,y=layout.boardY-60;
+    const x=layout.horizontalPadding,y=layout.goalY;
     ctx.fillStyle=COLORS.panel;ctx.fillRect(x+8,y+23,layout.width-2*x-16,17);
-    ctx.font='600 11px sans-serif';ctx.fillStyle=COLORS.primaryButton;ctx.textAlign='left';
+    ctx.font='600 11px sans-serif';ctx.fillStyle=COLORS.accent;ctx.textAlign='left';
     ctx.fillText('落子预览 · '+(notes.join(' · ') || (preview.brokenIce.length?'薄冰破开 · 下方方块保留':'本步不增加目标进度')),x+13,y+35,layout.width-x*2-26);
   }
 }
@@ -335,6 +330,7 @@ function drawMechanicGuide(ctx,layout,state) {
     ctx.globalAlpha=.12+.1*Math.sin(p*Math.PI*4);ctx.fillStyle='#BE9144';
     roundedRect(ctx,layout.boardX+(c+dx)*s+2,layout.boardY+(r+dy)*s+2,s-4,s-4,4);ctx.fill();
   }
+  if(guide.collapsed){ctx.restore();return;}
   ctx.globalAlpha=.97;ctx.fillStyle=COLORS.panel;roundedRect(ctx,panel.x,panel.y,panel.width,panel.height,14);ctx.fill();
   ctx.globalAlpha=1;ctx.strokeStyle=COLORS.boardEdge;ctx.lineWidth=1;ctx.stroke();
   text(ctx,guide.title,panel.x+12,panel.y+23,13,COLORS.text,'left','600');
@@ -352,8 +348,8 @@ function drawMechanicGuide(ctx,layout,state) {
     ctx.fillStyle=phase===0?'#D0F2FA':COLORS.block;roundedRect(ctx,x,y,31,31,5);ctx.fill();
     text(ctx,phase===0?'2':phase===1?'1':'✓',x+15,y+22,17,COLORS.text,'center','600');
   } else {
-    ctx.strokeStyle=COLORS.primaryButton;ctx.setLineDash([3,2]);ctx.strokeRect(x,y,31,31);ctx.setLineDash([]);
-    text(ctx,guide.id==='cross'?'+':'✓',x+15,y+22,18,COLORS.primaryButton,'center','600');
+    ctx.strokeStyle=COLORS.accent;ctx.setLineDash([3,2]);ctx.strokeRect(x,y,31,31);ctx.setLineDash([]);
+    text(ctx,guide.id==='cross'?'+':'✓',x+15,y+22,18,COLORS.accent,'center','600');
   }
   text(ctx,guide.lines[0],x+43,y+12,11,COLORS.text,'left');
   text(ctx,guide.lines[1],panel.x+12,panel.y+(panel.height<100?panel.height-8:80),11,COLORS.secondaryText,'left');
@@ -417,12 +413,30 @@ function shapeBounds(shape) {
 function drawSuggestion(ctx, layout, state) {
   const move=state.suggestion || mechanicGuide.move(state.mechanicGuide,state.challenge),piece=move&&state.tray[move.slot];
   if(!piece || state.gameOver)return;
-  ctx.save();ctx.strokeStyle=COLORS.primaryButton;ctx.lineWidth=2;ctx.setLineDash([4,3]);
+  ctx.save();ctx.strokeStyle=COLORS.accent;ctx.lineWidth=2;ctx.setLineDash([4,3]);
   for(const [x,y] of piece.cells) {
     roundedRect(ctx,layout.boardX+(move.c+x)*layout.cellSize+2,layout.boardY+(move.r+y)*layout.cellSize+2,layout.cellSize-4,layout.cellSize-4,4);ctx.stroke();
   }
   const center=layout.horizontalPadding+layout.traySlotWidth*(move.slot+.5);
   roundedRect(ctx,center-layout.traySlotWidth/2+5,layout.trayY-38,layout.traySlotWidth-10,76,10);ctx.stroke();ctx.restore();
+}
+
+// Reuse the actual board symbols in a read-only result thumbnail, including remaining pieces.
+function drawResultBoard(ctx, layout, state, rect) {
+  if (rect.height < 40) return;
+  const scale=Math.min((rect.width-76)/(layout.boardWidth+14),rect.height/(layout.boardHeight+14));
+  const width=(layout.boardWidth+14)*scale,x=rect.x+(rect.width-width-68)/2;
+  ctx.save();ctx.translate(x+7*scale,rect.y+7*scale);ctx.scale(scale,scale);
+  ctx.translate(-layout.boardX,-layout.boardY);drawBoard(ctx,layout,state);ctx.restore();
+  const trayX=x+width+12,slotHeight=rect.height/3;
+  state.tray.forEach((shape,index)=>{
+    if(!shape)return;
+    const bounds=shapeBounds(shape),cell=Math.min(12,48/bounds.width,(slotHeight-5)/bounds.height);
+    ctx.fillStyle=COLORS.block;
+    shape.cells.forEach(([c,r])=>{
+      roundedRect(ctx,trayX+(48-bounds.width*cell)/2+c*cell,rect.y+index*slotHeight+(slotHeight-bounds.height*cell)/2+r*cell,cell-1,cell-1,2);ctx.fill();
+    });
+  });
 }
 
 function drawTray(ctx, layout, state) {
@@ -431,6 +445,11 @@ function drawTray(ctx, layout, state) {
   const scale = 0.72 + entrance * 0.28;
 
   state.tray.forEach((shape, index) => {
+    // 空槽和拖起方块后仍保留底板；不改变原有命中范围。
+    ctx.fillStyle = state.drag && state.drag.trayIndex === index ? COLORS.traySelected : COLORS.trayBackground;
+    roundedRect(ctx, layout.horizontalPadding + index * layout.traySlotWidth + 4,
+      layout.trayY - layout.trayHitHalfHeight, layout.traySlotWidth - 8, layout.trayHitHalfHeight * 2, 16);
+    ctx.fill();
     if (!shape || (state.drag && state.drag.trayIndex === index)) return;
     const centerX = layout.horizontalPadding + layout.traySlotWidth * (index + 0.5);
     const bounds = shapeBounds(shape);
@@ -471,6 +490,7 @@ function drawTray(ctx, layout, state) {
 module.exports = { 
   nearbyEnergy,
   drawBoard,
+  drawResultBoard,
   drawClearAnimation,
   drawPlacementPreview,
   drawIceAnimation,

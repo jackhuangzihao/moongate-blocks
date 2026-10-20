@@ -20,11 +20,12 @@ for(const size of [{w:320,h:568},{w:375,h:667},{w:390,h:844},{w:430,h:932}]){
  if(app.run('state.playPanel'))app.tap(app.run('getPlayPanelActions(layout,state).confirm'));
  app.move(C.LEVELS[48].solution[0]);assert.equal(app.run('state.challenge.history.length'),1);
 }
-// Selected progress is real and consistent on home, in play and after completion.
+// Growth stays on home/results, while play keeps a compact, tappable rule card.
 const app=boot({[K.KEY]:{version:1,clears:19,target:'plum',seen:['bamboo'],hidden:[]},fangcunTutorialSeen:true});
 assert.ok(app.draw().some(x=>x.text.includes('19/20 次消除')));
 app.run('continueOrStartGame()');assert.equal(app.run('state.board.length'),9);assert.equal(app.run('state.board[0].length'),9);
-assert.ok(app.draw().some(x=>x.text.includes('19/20 次消除')));
+assert.ok(!app.draw().some(x=>x.text.includes('19/20 次消除')));
+assert.ok(app.draw().some(x=>x.text==='规则 ⓘ'));
 app.run('state.gameOver=true;state.gameOverProgress=1');
 assert.ok(app.draw().some(x=>x.text.includes('19/20 次消除')));
 assert.ok(app.draw().some(x=>x.text.includes('托盘方块都放不下')));

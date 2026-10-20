@@ -9,6 +9,22 @@ function star(ctx,x,y,r,color) {
     if(i)ctx.lineTo(x+Math.cos(a)*rad,y+Math.sin(a)*rad);else ctx.moveTo(x,y-r);}
   ctx.closePath();ctx.fill();
 }
+// Deterministic edge sparkles: no random consumption, timers or input blocking.
+function celebration(ctx,rect,progress,strong=false) {
+  if (!Number.isFinite(progress) || progress <= 0 || progress >= 1) return;
+  ctx.save();ctx.beginPath();ctx.rect(rect.x,rect.y,rect.width,rect.height);ctx.clip();
+  const count=strong?24:12;
+  for(let i=0;i<count;i++){
+    const t=Math.max(0,(progress-(i%3)*.035)/.9);
+    if(t>=1)continue;
+    const side=i%2?1:-1,angle=(i*.87)%Math.PI;
+    const x=rect.x+rect.width*(side<0?.13:.87)+side*Math.cos(angle)*26*t;
+    const y=rect.y+rect.height*(.28+(i%5)*.11)-Math.sin(Math.PI*t)*25+t*t*35;
+    ctx.globalAlpha=Math.sin(Math.PI*t)*.8;
+    star(ctx,x,y,(strong?3.5:2.5)*(1-t*.35),i%3?'#B68A43':'#8BA78B');
+  }
+  ctx.restore();
+}
 // 庭院收藏的物件都画在同一套 300×190 坐标里；decor 是已解锁物件的 id 列表。
 function stroke(ctx,color,width,points) {
   ctx.strokeStyle=color;ctx.lineWidth=width;ctx.lineCap='round';ctx.beginPath();
@@ -167,8 +183,9 @@ function path(ctx,rect,level=1) {
   ctx.save();ctx.translate(rect.x+(rect.width-300*scale)/2,rect.y+(rect.height-190*scale)/2);ctx.scale(scale,scale);
   ctx.strokeStyle='#c6d6f0';ctx.lineWidth=29;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(40,175);ctx.bezierCurveTo(53,83,142,133,174,111);ctx.quadraticCurveTo(226,97,236,28);ctx.stroke();
   ctx.strokeStyle='#fff';ctx.lineWidth=3;if(ctx.setLineDash)ctx.setLineDash([5,8]);ctx.stroke();if(ctx.setLineDash)ctx.setLineDash([]);
-  [[67,132],[131,107],[206,88]].forEach(([x,y],i)=>{oval(ctx,x,y,i===2?32:26,i===2?32:26,'#fff');oval(ctx,x,y,i===2?26:21,i===2?26:21,i===2?'#edb451':'#82aa96');ctx.fillStyle=i===2?'#765117':'#fff';ctx.font='600 18px sans-serif';ctx.textAlign='center';ctx.fillText(String(i===2?level:level-2+i>0?level-2+i:'·'),x,y+6);});
+  // null is a date-based challenge, which has no public chapter number.
+  [[67,132],[131,107],[206,88]].forEach(([x,y],i)=>{oval(ctx,x,y,i===2?32:26,i===2?32:26,'#fff');oval(ctx,x,y,i===2?26:21,i===2?26:21,i===2?'#edb451':'#82aa96');ctx.fillStyle=i===2?'#765117':'#fff';ctx.font='600 18px sans-serif';ctx.textAlign='center';ctx.fillText(level===null?(i===2?'✓':'·'):String(i===2?level:level-2+i>0?level-2+i:'·'),x,y+6);});
   ctx.strokeStyle='#4365b9';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(244,28);ctx.lineTo(244,4);ctx.lineTo(269,11);ctx.lineTo(244,20);ctx.stroke();
   star(ctx,158,35,13,'#e8ac62');star(ctx,242,158,11,'#e8ac62');ctx.restore();
 }
-module.exports={garden,path,star};
+module.exports={garden,path,star,celebration};
