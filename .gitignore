@@ -16,6 +16,43 @@ __pycache__/
 *.tar.gz
 *.log
 
+# Original media and machine-specific release records remain local.
+/assets/audio/original-22khz/
+/assets/branding/game-avatar-source.png
+/docs/打开最新发布版.command
+/docs/最新发布版本.txt
+/docs/本地版本与测试.md
+
+# Historical promotion workspaces and standalone visual experiments.
+/docs/promotion-*/
+/docs/previews/appearance-*/index.html
+/docs/previews/appearance-*/visual-check.json
+/docs/previews/result-review-*/index.html
+/docs/previews/result-review-*/自动检查结果.txt
+/docs/previews/ui-review-*/index.html
+/docs/previews/three-directions.html
+/docs/previews/check-preview.js
+
+# Repeated machine reports; keep written conclusions and reference routes.
+/docs/refactor-*/*.txt
+/docs/refactor-*/source-*-sha256.json
+/docs/directory-review-*/*.txt
+/docs/directory-review-*/changed-files.json
+/docs/directory-review-*/source-*-sha256.json
+/docs/stress-*.json
+/docs/challenge*.json
+/docs/**/test-results.txt
+/docs/**/test-results.json
+/docs/**/stress-results.json
+/docs/**/preview-check.txt
+/docs/**/module-check.txt
+/docs/**/garden-final-check.txt
+/docs/reviews/local-version-tests-*.txt
+/docs/reviews/**/回归测试日志.txt
+
+# Reproducible browser output; keep source and build instructions in Git.
+/dist/
+
 # Rebuildable previews and review media.
 /docs/previews/playable.html
 /docs/previews/daily-week.html
@@ -29,9 +66,6 @@ __pycache__/
 /docs/**/*.wav
 /docs/**/*.mp4
 /docs/**/*.mov
-!/docs/promotion-2026-09-27/*.png
-!/docs/promotion-2026-09-27/*.jpg
-!/docs/promotion-2026-09-27/*.jpeg
 
 # README screenshots are part of the repository page.
 !/docs/readme/*.jpg

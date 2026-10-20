@@ -1,3 +1,0 @@
-PASS: gravity direct entry, optional demo, undo/resume/restart, animation/background, write retry, idle rendering, isolation and all three garden undo budgets
-Built archived gravity laboratory
-PASS: built preview loads, all six puzzles via real controller events, drag/tap, animation save, hide, multi-touch and undo controls

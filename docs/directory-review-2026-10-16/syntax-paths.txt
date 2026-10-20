@@ -1,4 +1,0 @@
-PASS: node --check on 91 active JS/CJS files.
-PASS: old paths absent from active callers, tests, preview generators and AGENTS.md.
-PASS: full-test copy matches final runtime and test contents.
-PASS: all runtime imports resolve; no dependency cycles (checked after each migration group).

@@ -1,2 +1,0 @@
-PASS: 438 fixed screen/size cases: identical Canvas commands, exported action areas and post-render state
-PASS: 92 real Canvas images identical pixel-for-pixel (320×568 and 390×844)

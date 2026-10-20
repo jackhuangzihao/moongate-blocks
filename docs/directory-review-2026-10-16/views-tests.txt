@@ -1,7 +1,0 @@
-UI action checks passed
-Two-mode screens fit compact and notched phones
-Challenge controls and next-tray preview fit four phone sizes without board/tray overlap
-All chapters and daily entry fit four phone sizes; video revival entry fits
-Feedback entry and all settings rows fit without overlap
-PASS: 392 actual touch previews; 40 watering, 22 bloom and 31 gate moves; cache, cancellation and immutable saves
-PASS: shared drag anchoring, floating piece outside/inside board, tray removal, legal-only previews, highlights, cache and rejected releases

@@ -1,1 +1,0 @@
-PASS: 438 fixed screen/size cases: identical Canvas commands, exported action areas and post-render state

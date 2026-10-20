@@ -2,128 +2,97 @@
 
 *方寸九宫 · Fangcun Jiugong*
 
-A calm block-placement puzzle game for **WeChat Mini Games**, set in a small Chinese courtyard behind a moon gate.
+A calm block-placement puzzle for **WeChat Mini Games**, set in a small Chinese courtyard behind a moon gate.
 Drag pieces onto a 9×9 board and clear full rows, columns or 3×3 palaces.
 
-Written in plain JavaScript on Canvas 2D: no framework, no build step, no runtime dependencies.
+[Gameplay](#gameplay) · [Browser preview](#browser-preview) · [Development guide](docs/development.md) · [Asset notes](docs/assets.md) · [License](#license) · [中文说明](#中文说明)
 
-[中文说明](#中文说明)
+Plain JavaScript, CommonJS and Canvas 2D. The WeChat game needs no framework, package installation or build step. The optional browser preview is generated from the same sources.
 
 <table>
   <tr>
-    <td><img src="docs/readme/home.jpg" width="200" alt="Home screen with the courtyard illustration"></td>
-    <td><img src="docs/readme/garden.jpg" width="200" alt="Free play on the garden board"></td>
-    <td><img src="docs/readme/challenge.jpg" width="200" alt="A challenge level with ice tiles and target markers"></td>
+    <td><img src="docs/readme/home.jpg" width="200" alt="Home screen with the courtyard illustration"><br>Home · 庭院首页</td>
+    <td><img src="docs/readme/garden.jpg" width="200" alt="Free play on the garden board"><br>Free play · 自由消除</td>
+    <td><img src="docs/readme/challenge.jpg" width="200" alt="A challenge level with ice tiles and target markers"><br>Challenge · 目标闯关</td>
   </tr>
   <tr>
-    <td><img src="docs/readme/gravity.jpg" width="200" alt="Gravity mode, where blocks fall after a clear"></td>
-    <td><img src="docs/readme/collection.jpg" width="200" alt="My Courtyard collection page"></td>
-    <td><img src="docs/readme/theme-neon.jpg" width="200" alt="Dark neon theme on the challenge home screen"></td>
+    <td><img src="docs/readme/gravity.jpg" width="200" alt="Gravity mode, where blocks fall after a clear"><br>Gravity · 落玉庭</td>
+    <td><img src="docs/readme/collection.jpg" width="200" alt="My Courtyard collection page"><br>Collection · 我的庭院</td>
+    <td><img src="docs/readme/theme-neon.jpg" width="200" alt="Dark neon theme on the challenge home screen"><br>Neon theme · 暗色霓虹</td>
   </tr>
 </table>
 
-## Game modes
+## Gameplay
 
-- **Free play (自由消除)** — endless play on three boards: an open 9×9, a board with a blocked centre, and one with five "star point" obstacles. Clearing marked palaces charges energy that grants a small lucky piece.
-- **Challenge (目标闯关)** — 90 hand-built levels in five chapters. Every level has a fixed deck and a move limit, and introduces ice that takes two clears, stones that never clear, and gates. Finish in fewer moves for three stars.
-- **Daily pick (每日精选)** — one curated level each day.
-- **落玉庭 (Gravity)** — after a clear, blocks above fall down and can set off chain clears. Six teaching puzzles, then free play.
+- **Free play (自由消除)** — three boards: an open 9×9, a blocked centre, and five star-point obstacles. Clear marked palaces to charge energy and earn a small lucky piece.
+- **Challenge (目标闯关)** — 90 levels in five chapters, with fixed decks and move limits. Ice needs two clears; stones and gates add constraints. Finish in fewer moves for more stars.
+- **Daily pick (每日精选)** — one curated challenge each day.
+- **Gravity (落玉庭)** — clears let blocks fall and trigger chain clears. Six teaching puzzles lead into free play.
 
-Around the modes:
+Grow plants through play, use challenge stars to furnish the courtyard, and unlock visual themes. Undo budgets, verified hints, WeChat friends rankings and result-sharing cards support the main modes.
 
-- **My Courtyard** — cleared lines grow plants and earned stars add furnishings. Unlocked items are drawn into the home-screen illustration and the share card.
-- **Helpers** — undo with a per-level budget, and hints that only suggest moves backed by a verified winning line.
-- **Themes** — Classic, Ink (black and white), and Neon (unlocked by play).
-- **Social** — a WeChat friends leaderboard, share cards for results, and "can you beat my move count" invitations.
+## Browser preview
 
-## Technical highlights
+The preview runs the current game logic with a small browser substitute for WeChat APIs. Use a mouse or touch to play. Browser progress stays separate from WeChat saves; friends rankings, real ads, sending shares and in-game audio require WeChat.
 
-- **Rendering** — one `requestAnimationFrame` loop with an off-screen scene cache and a separate dynamic layer. The loop goes idle when nothing changes, so a still screen costs almost no GPU.
-- **Deterministic randomness** — tray dealing and energy targets use a seeded PRNG that is stored in the save, so undo or relaunch can never reroll the next pieces.
-- **Verified hints** — a bounded search, capped by both node count and wall-clock time, replays a complete winning continuation before it offers a hint. When the current board cannot be verified, it steps back to the nearest position that still wins.
-- **Level tooling** — every level ships with a reference solution. Tests replay each one, fuzz random play with undo, and check pacing across chapters.
-- **Save safety** — writes go through a retry queue, so a failed storage call is retried instead of losing progress. Old saves migrate forward when rules change.
-- **Accessibility** — palettes are checked for colour-vision deficiency with simulated vision and CIEDE2000 colour distance.
+With **Node.js 24**, generate the static preview:
 
-## Project layout
-
-```
-game.js              scenes, input, lifecycle, feature coordination
-js/rules/            board, shapes, garden scoring
-js/challenge/        challenge rules and level data
-js/daily/            daily levels
-js/gravity/          gravity-mode engine and view
-js/progression/      collection, onboarding, goals, themes
-js/persistence/      storage and save formats
-js/platform/         audio, sharing, ads, leaderboard, analytics
-js/views/            layout, menus, board and panel drawing
-open-data/           WeChat open-data context (friends leaderboard)
-tests/               Node test suites and level-design tools
+```sh
+node tests/build-playable-preview.js --site
 ```
 
-About 9,500 lines of game code and 5,400 lines of tests.
+Open `dist/browser/index.html`. The output contains only the page and a copy of `LICENSE`; no package installation or server is required for the local preview. Browser storage behaviour can vary for local files; use a local static server if saving is blocked.
 
-## Running it
+A public demo URL has not been configured here. See the [development guide](docs/development.md#浏览器试玩与静态发布) for local checks and future static hosting.
 
-**In WeChat DevTools:** choose *Import project → Mini Game* and select this folder. `project.config.json` contains the author's AppID. To preview without it, switch to a test AppID (测试号) in DevTools.
+## Development
 
-**Tests** (Node.js 18 or newer, nothing to install):
+Import this project folder as a **Mini Game** in WeChat DevTools. The checked-in configuration contains the author's AppID; without project access, use a test AppID in your local DevTools configuration. Platform features still need their corresponding permissions.
+
+Tests use Node's built-in modules, with nothing to install:
 
 ```sh
 node tests/run.js
 ```
 
-This runs all 39 suites, each in its own process: rules, saves, every level's reference solution, hints, layout on several screen sizes, colour accessibility, and a 300-game stress run.
+Run the full suite in a disposable project copy: one gravity test regenerates a preview inside `docs/prototypes`. Tests cover rules, saves, reference solutions, hints, input, layout, colours, browser startup and random-play stress checks. They do not replace WeChat compilation or device testing.
 
-**Browser preview** — builds a playable page from the real sources, so you can try it without WeChat:
+The [development guide](docs/development.md) explains the project layout, test side effects, simulator entries and platform limits. The [repository file guide](docs/repository-files.md) separates source, test fixtures, historical records and generated output.
 
-```sh
-node tests/build-playable-preview.js
-# then open docs/previews/playable.html
-```
+## Implementation notes
 
-## Status
-
-A personal project. Development builds have been uploaded to WeChat for testing; it has not been published to the public yet.
+- **Rendering** — one animation loop, an off-screen scene cache and dynamic overlays reduce repeated drawing. A static screen skips rendering; the loop still runs while foregrounded.
+- **Repeatable dealing** — a running game's PRNG state is saved and restored for undo and resume. Starting a new free-play game uses a new seed.
+- **Verified hints** — search has node and time limits and verifies a winning continuation before suggesting a move. An unverified position may require stepping back.
+- **Save handling** — storage errors queue writes for retry while the process remains alive. Closing the app before a successful write can still lose that pending update; compatibility handling is covered by tests.
+- **Level checks** — reference solutions are replayed through the engine, alongside random play, undo and pacing checks.
+- **Colour checks** — tests simulate colour-vision deficiencies and measure CIEDE2000 colour distance.
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE). You may read, run, modify and share it for **noncommercial** purposes as long as you keep the copyright notice. Commercial use is not permitted. Issues and suggestions are welcome.
+Source is available under [PolyForm Noncommercial 1.0.0](LICENSE). Permitted noncommercial use includes reading, running, modifying and sharing. Distribution must include the license terms or their URL **and all `Required Notice:` lines**. Commercial use requires separate permission; the full license governs.
+
+This is a source-available project with a noncommercial restriction. Icons, music and effects were AI generated according to the author; generation-provider and usage-term records remain to be completed in the [asset notes](docs/assets.md).
+
+Issues and suggestions are welcome. Please include the mode, reproduction steps and environment, and remove personal data from logs or screenshots.
 
 ---
 
 ## 中文说明
 
-Moongate Blocks 的中文名是《方寸九宫》，是一款微信小游戏：把方块拖进 9×9 棋盘，填满整行、整列或一个 3×3 宫格就能消除，整体是安静的中式庭院风格。
+《方寸九宫》是一款庭院风格的微信小游戏：把方块放进 9×9 棋盘，填满整行、整列或一个 3×3 宫格即可消除。
 
-全部用原生 JavaScript 和 Canvas 2D 编写，没有框架，不需要构建，也没有运行时依赖。
-
-### 玩法
-
-- **自由消除**：不限时，有方庭、石台、星位三种棋盘。清除带标记的目标宫可以充能，充满后获得幸运小方块。
-- **目标闯关**：五章共 90 关，发牌固定、步数有限，逐步引入薄冰（要消两次）、圆石（不可消除）和门等机关；步数越少星级越高。
+- **自由消除**：方庭、石台、星位三种棋盘，消除目标宫可充能，获得幸运小方块。
+- **目标闯关**：五章共 90 关，固定发牌、限步达标，包含薄冰、圆石和门等机关。
 - **每日精选**：每天一道精选关卡。
-- **落玉庭**：消除后上方方块会落下，可能接着连锁消除。先玩 6 道教学题，再进入自由模式。
-- **我的庭院**：庭院里的消除让花木生长，闯关星数用来添置陈设；解锁的物件会画进首页插画和分享卡片。
-- **辅助**：撤回有每关额度；提示只给经过验证、一定能通关的下一步。
-- **外观**：清雅原色、水墨黑白、暗色霓虹（通过游玩解锁）。
-- **社交**：微信好友排行、成绩分享卡，以及"看你几步能过"的好友邀请。
+- **落玉庭**：消除后方块下落，可继续触发连锁；先有 6 道教学题，再进入自由模式。
 
-### 技术要点
+此外还有庭院收藏、主题外观、撤回与提示，以及微信内的好友排行和分享卡片。
 
-- **渲染**：单一渲染循环，静态画面缓存在离屏画布里，画面不变时停止绘制，几乎不耗电。
-- **随机数可复现**：发牌和充能目标使用写进存档的种子随机数，撤回或重开都不会重新抽牌。
-- **提示经过验证**：提示由限定步数和时间的搜索得出，先完整走通一条通关路线才给出；当前局面无法验证时，先退回到最近一个仍能通关的局面。
-- **关卡工具**：每关都有参考解，测试会逐关回放，并用带撤回的随机对局做模糊测试，同时检查各章的难度节奏。
-- **存档安全**：写入失败会排队重试，规则调整后旧存档会自动迁移。
-- **色觉无障碍**：配色用色觉缺陷模拟和 CIEDE2000 色差检查过。
+**先试玩**：使用 Node.js 24 运行 `node tests/build-playable-preview.js --site`，打开 `dist/browser/index.html`。目前仅准备本地页面，尚未配置公开试玩网址。网页存档与微信独立；微信好友榜、真实广告、分享发送和游戏音频需要在微信中体验。
 
-### 本地运行
+**开发和测试**：用微信开发者工具导入本目录；自动测试使用 `node tests/run.js`，无需安装依赖。全量测试会生成重力实验页面，建议在临时副本执行。详见[开发指南](docs/development.md)和[仓库文件清单](docs/repository-files.md)。
 
-- **开发者工具**：选「导入项目 → 小游戏」，目录选本文件夹。`project.config.json` 里是作者的 AppID，没有权限时请在开发者工具中改用测试号。
-- **测试**：需要 Node.js 18 或以上，无需安装依赖，运行 `node tests/run.js`，共 39 组测试。
-- **浏览器试玩**：运行 `node tests/build-playable-preview.js`，然后打开 `docs/previews/playable.html`。
+**许可**：沿用 [PolyForm Noncommercial 1.0.0](LICENSE)。允许许可范围内的非商业查看、运行、修改和分享；分发时须提供许可条款或其网址，并保留所有 `Required Notice:` 声明。商业使用需另行取得许可，具体以完整条款为准。这是附有非商业限制的源码公开项目。
 
-### 许可
-
-本项目按 [PolyForm Noncommercial 1.0.0](LICENSE) 授权：保留版权声明即可非商业地查看、运行、修改和分享；不允许商业使用。欢迎提 issue 和建议。
+图标、背景音乐和音效由作者确认为 AI 生成，来源记录见[素材说明](docs/assets.md)。本机历史上传记录不随仓库提供；GitHub 源码更新、网页发布、微信上传、提审和正式上线是不同操作。

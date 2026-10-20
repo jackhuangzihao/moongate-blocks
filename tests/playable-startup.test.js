@@ -56,13 +56,13 @@ function boot(html, file, search) {
     vm.runInContext('statusTick()', sandbox, { timeout: 5000 });
   }
   assert.ok(labels.length > 0 && painted > 0, 'First frame must draw labels and present the scene');
-  return { elements, labels };
+  return { elements, labels, store };
 }
 
 // Always build from current sources; never overwrite the user's generated previews.
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'fangcun-playable-test-'));
 try {
-  for (const relative of ['game.js', 'js', 'assets/audio', 'tests/build-playable-preview.js', 'tests/helpers/preview-bundle.js']) {
+  for (const relative of ['game.js', 'js', 'assets/audio', 'LICENSE', 'tests/build-playable-preview.js', 'tests/helpers/preview-bundle.js']) {
     const destination = path.join(temporary, relative);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
     fs.cpSync(path.join(root, relative), destination, { recursive: true });
@@ -86,7 +86,23 @@ try {
     if (file === 'daily-week.html') assert.equal(result.elements['lab-level'].children.length, 7);
     if (search === '?lab=1') assert.ok(result.elements['lab-level'].children.length > 0);
   }
-  console.log('PASS: freshly built home, small screen, challenge, daily and gravity previews boot, bind input and draw a frame');
+  // Public output must not expose debug controls or include local review media.
+  fs.mkdirSync(path.join(temporary, 'docs/previews/audio-review'), { recursive: true });
+  fs.writeFileSync(path.join(temporary, 'docs/previews/audio-review/effects-after.wav'), 'local review fixture');
+  execFileSync(process.execPath, ['tests/build-playable-preview.js', '--site'], { cwd: temporary, timeout: 30000, stdio: 'pipe' });
+  assert.deepEqual(fs.readdirSync(path.join(temporary, 'dist/browser')).sort(), ['LICENSE', 'index.html']);
+  assert.equal(fs.readFileSync(path.join(temporary, 'dist/browser/LICENSE'), 'utf8'), fs.readFileSync(path.join(root, 'LICENSE'), 'utf8'));
+  const site = fs.readFileSync(path.join(temporary, 'dist/browser/index.html'), 'utf8');
+  assert.ok(!site.includes('<audio') && !site.includes('audio-review/'), 'Public preview must not depend on private listening comparisons');
+  assert.equal(fs.readFileSync(path.join(temporary, 'docs/previews/playable.html'), 'utf8'), home, 'Site build must preserve developer previews');
+  for (const search of ['', '?size=small', '?lab=1']) {
+    const result = boot(site, 'index.html', search);
+    assert.ok(result.elements.status.textContent.includes('首页'), 'Public entry must keep normal onboarding, including lab query');
+    assert.ok(Object.keys(result.store).some(key => key.startsWith('moongateBlocksWeb:')), 'Public saves must use their own browser namespace');
+  }
+  execFileSync(process.execPath, ['tests/build-playable-preview.js', '--site'], { cwd: temporary, timeout: 30000, stdio: 'pipe' });
+  assert.equal(fs.readFileSync(path.join(temporary, 'dist/browser/index.html'), 'utf8'), site, 'Site build must be reproducible');
+  console.log('PASS: developer and public previews boot, bind input, draw a frame, isolate saves and preserve license notices');
 } finally {
   fs.rmSync(temporary, { recursive: true, force: true });
 }

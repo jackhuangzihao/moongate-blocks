@@ -1,5 +1,0 @@
-PASS: actual built playable.html boots and renders first frame with isolated storage
-PASS: actual built playable.html?size=small boots and renders first frame with isolated storage
-PASS: actual built playable.html?lab=1 boots and renders first frame with isolated storage
-PASS: actual built daily-week.html boots and renders first frame with isolated storage
-PASS: actual built gravity.html boots and renders first frame with isolated storage

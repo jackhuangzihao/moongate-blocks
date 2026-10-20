@@ -32,8 +32,11 @@
 | 音频、反馈、广告、分享、统计 | `js/platform/feedback.js`、`js/platform/player-feedback.js`、`js/platform/rewarded-ad.js`、`js/platform/sharing.js`、`js/platform/analytics.js` |
 | 微信好友排行 | `js/platform/leaderboard.js`、`open-data/index.js` |
 | 测试与关卡评估 | `tests/`、`tests/helpers/`、`tests/design/` |
-| 本地版本记录与测试使用说明 | `docs/本地版本与测试.md` |
-| 最新发布信息与历史副本 | `docs/最新发布版本.txt`、`docs/releases/` |
+| 本机历史版本与测试记录（仅本地保留） | `docs/本地版本与测试.md` |
+| 当前开发、浏览器试玩与公开文件范围 | `docs/development.md`、`docs/repository-files.md`、`docs/assets.md` |
+| 本机历史发布信息与副本（仅本地保留） | `docs/最新发布版本.txt`、`docs/releases/` |
+
+本机历史记录不随公开仓库提供；克隆环境以 Git 版本和 `docs/development.md` 为起点，不假设这些本地记录存在。
 
 ## 2. 固定开发流程与确认边界
 
@@ -157,6 +160,7 @@
 - 完整试玩启动：`node tests/playable-startup.test.js`（临时生成当前源码的页面，模拟 DOM、Canvas 和存储，检查五种入口的首帧；不代替像素对比、真实浏览器或真机）。
 - 语法检查：`node --check <改动的 JS 文件>`
 - 浏览器试玩生成：`node tests/build-playable-preview.js`
+- 展示试玩生成：`node tests/build-playable-preview.js --site`（输出 `dist/browser/`，含页面及许可文件，不自动部署）。
 - 微信实际编译、预览与上传：微信开发者工具及其官方 CLI。
 - 没有 npm 工程时，不使用臆造的 `npm build/test` 命令。
 
@@ -172,6 +176,7 @@
 - 运行前检查脚本的写入行为、输出目录及环境需求。
 - `tests/gravity-controller.test.js` 会调用 `tests/build-gravity-preview.js`，涉及 `docs/prototypes/gravity` 下的产物。
 - `tests/build-playable-preview.js` 会覆盖 `docs/previews` 下的相关试玩文件。
+- 该生成器使用 `--site` 时只写 `dist/browser/`，不覆盖开发预览；生成目录已忽略，公开托管须另行确认。
 - `tests/playable-startup.test.js` 自建系统临时目录生成页面并在结束后清理，不覆盖项目预览，也不依赖额外 Canvas 库。
 - 其他生成器分别检查，不能假设所有预览都写到同一目录。
 - 全量测试宜在独立临时副本运行，保留所需源码、`tests`、`assets`、`docs/prototypes` 等相对路径及必要输出目录。

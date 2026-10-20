@@ -1,1 +1,0 @@
-PASS: playable.html and daily-week.html scripts parse. Both are built from current game sources.

@@ -1,2 +1,0 @@
-Checked 43 runtime JavaScript files: syntax, literal relative require targets, dependency cycles and duplicate top-level function declarations.
-PASS

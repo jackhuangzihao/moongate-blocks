@@ -1,8 +1,0 @@
-PASS: 90 solvable levels, 18000 random games / 169435 moves, actual UI progression, resume, score isolation and storage retry
-PASS: undo across tray refill/failure/relaunch, video hint entry, locked feedback, append-only progress migration and result share
-PASS: ice two-hit rules, no one-move shortcuts after tutorials, chapter tabs, permanent barriers and revision migration
-PASS: pending saves survive home/mode changes, failed reads, next-tray/undo consistency, rule-3 migration and distinct ice preview
-PASS: crossing/reused-space layouts, road barriers, 17 revised levels with order-sensitive routes, revised progress migration
-PASS: 5 chapter entries, append-only progress migration, moderate budgets, 10 order-sensitive fourth-chapter puzzles
-PASS: flower watering, simultaneous-clear limit, permanent beds, replay and undo
-PASS: fifth chapter, 85 exact immutable previews, 154 gate-cell openings, 12 order-sensitive routes, 68091 two-move shortcut checks, ice keys, undo/relaunch and verified hints
