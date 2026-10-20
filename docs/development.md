@@ -15,7 +15,7 @@
 
 ## 自动测试
 
-建议使用 **Node.js 24**；本轮本地验证使用 v24.20.0。其他版本没有在本轮验证。无需运行 `npm install`。
+建议使用 **Node.js 24**（在 v24.20.0 上验证过，CI 也使用 Node 24）。无需运行 `npm install`。
 
 ```sh
 # 单项测试，先确认该测试是否生成文件
@@ -31,13 +31,9 @@ node tests/run.js
 
 `tests/run.js` 按文件名发现 `tests/*.test.js`，每组在独立进程运行。内容包括棋盘规则、存档兼容、关卡参考解、每日、重力、输入、布局、颜色和随机对局等。测试使用模拟 API，不请求真实广告或微信好友资料。
 
-全量测试建议在临时副本运行。复制以下路径，保持相对结构，然后在副本根目录执行全量命令：
+全量测试可以直接在仓库里运行。唯一写入项目目录的是 `docs/prototypes/gravity/lab.html`，它已被 Git 忽略，跑完后工作区仍是干净的。
 
-- `game.js`、`game.json`、`project.config.json`、`LICENSE`；
-- `js/`、`open-data/`、`assets/`、`tests/`；
-- `docs/prototypes/gravity/` 中的 `engine.js`、`controller.js` 和 `preview.html`。
-
-主要写入行为：
+各命令的写入位置：
 
 | 命令或测试 | 写入位置 |
 | --- | --- |
@@ -48,7 +44,10 @@ node tests/run.js
 
 不要把 `docs/prototypes` 当作可随意删除的历史资料：重力测试仍读取其中的三个源文件。生成的 `lab.html` 则已忽略。
 
-`.github/workflows/test.yml` 为后续推送和拉取请求准备自动测试：使用 Node 24 运行全量测试并生成浏览器页面，仅授予仓库读取权限，不执行提交或部署。配置上传后才会由 GitHub 执行；本地通过不等于远端已通过。
+GitHub 上有两个工作流：
+
+- `.github/workflows/test.yml`：每次推送和拉取请求都用 Node 24 运行全量测试，并生成一次浏览器页面，只有仓库读取权限。
+- `.github/workflows/pages.yml`：推送到 `main` 时先跑全量测试，通过后生成展示页面并发布到 GitHub Pages。测试失败时不会发布。
 
 ## 浏览器试玩与静态发布
 
@@ -64,7 +63,7 @@ node tests/build-playable-preview.js
 
 开发预览使用 `fangcunPreview:` 浏览器存储前缀，展示页面使用 `moongateBlocksWeb:`，二者不会覆盖彼此；都不读写微信存档。浏览器存储受站点地址和浏览器策略影响，隐私模式、清理站点数据或本地文件限制可能使进度无法保留。
 
-目前没有配置公开网址或自动网页部署。未来若使用静态托管，只需将本次生成的 `dist/browser/` 内容作为网站根目录；托管设置和正式发布另行确认，不直接发布整个项目文件夹。
+在线试玩地址：<https://jackhuangzihao.github.io/moongate-blocks/>。它由 `pages.yml` 自动部署，内容就是 `dist/browser/`，不会发布整个项目文件夹。更新在线版本只需推送到 `main`。
 
 浏览器检查建议：
 

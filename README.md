@@ -5,6 +5,8 @@
 A calm block-placement puzzle for **WeChat Mini Games**, set in a small Chinese courtyard behind a moon gate.
 Drag pieces onto a 9×9 board and clear full rows, columns or 3×3 palaces.
 
+**[▶ Play in your browser](https://jackhuangzihao.github.io/moongate-blocks/)**
+
 [Gameplay](#gameplay) · [Browser preview](#browser-preview) · [Development guide](docs/development.md) · [Asset notes](docs/assets.md) · [License](#license) · [中文说明](#中文说明)
 
 Plain JavaScript, CommonJS and Canvas 2D. The WeChat game needs no framework, package installation or build step. The optional browser preview is generated from the same sources.
@@ -33,17 +35,17 @@ Grow plants through play, use challenge stars to furnish the courtyard, and unlo
 
 ## Browser preview
 
+**Live demo: <https://jackhuangzihao.github.io/moongate-blocks/>** — no install needed.
+
 The preview runs the current game logic with a small browser substitute for WeChat APIs. Use a mouse or touch to play. Browser progress stays separate from WeChat saves; friends rankings, real ads, sending shares and in-game audio require WeChat.
 
-With **Node.js 24**, generate the static preview:
+To build it yourself with **Node.js 24**:
 
 ```sh
 node tests/build-playable-preview.js --site
 ```
 
-Open `dist/browser/index.html`. The output contains only the page and a copy of `LICENSE`; no package installation or server is required for the local preview. Browser storage behaviour can vary for local files; use a local static server if saving is blocked.
-
-A public demo URL has not been configured here. See the [development guide](docs/development.md#浏览器试玩与静态发布) for local checks and future static hosting.
+Open `dist/browser/index.html`. The output is a single self-contained page plus a copy of `LICENSE`. Every push to `main` runs the tests and redeploys the live demo through GitHub Pages.
 
 ## Development
 
@@ -55,16 +57,16 @@ Tests use Node's built-in modules, with nothing to install:
 node tests/run.js
 ```
 
-Run the full suite in a disposable project copy: one gravity test regenerates a preview inside `docs/prototypes`. Tests cover rules, saves, reference solutions, hints, input, layout, colours, browser startup and random-play stress checks. They do not replace WeChat compilation or device testing.
+All 39 suites cover rules, saves, every level's reference solution, hints, input, layout, colours, browser startup and a random-play stress run. The only file they write inside the project is a git-ignored gravity preview, so the working tree stays clean. GitHub Actions runs the same suites on every push.
 
-The [development guide](docs/development.md) explains the project layout, test side effects, simulator entries and platform limits. The [repository file guide](docs/repository-files.md) separates source, test fixtures, historical records and generated output.
+See the [development guide](docs/development.md) for the project layout and platform notes, and the [repository file guide](docs/repository-files.md) for what is and isn't tracked.
 
 ## Implementation notes
 
-- **Rendering** — one animation loop, an off-screen scene cache and dynamic overlays reduce repeated drawing. A static screen skips rendering; the loop still runs while foregrounded.
-- **Repeatable dealing** — a running game's PRNG state is saved and restored for undo and resume. Starting a new free-play game uses a new seed.
-- **Verified hints** — search has node and time limits and verifies a winning continuation before suggesting a move. An unverified position may require stepping back.
-- **Save handling** — storage errors queue writes for retry while the process remains alive. Closing the app before a successful write can still lose that pending update; compatibility handling is covered by tests.
+- **Rendering** — one animation loop with an off-screen scene cache and a separate dynamic layer. When nothing changes, frames are skipped entirely.
+- **Repeatable dealing** — the PRNG state is stored in the save, so undo or resume can never reroll the next pieces.
+- **Verified hints** — a bounded search replays a full winning line before suggesting a move. If the current board can't be verified, the hint steps back to the nearest position that still wins.
+- **Save handling** — failed writes are queued and retried, and older saves migrate forward when rules change.
 - **Level checks** — reference solutions are replayed through the engine, alongside random play, undo and pacing checks.
 - **Colour checks** — tests simulate colour-vision deficiencies and measure CIEDE2000 colour distance.
 
@@ -72,7 +74,7 @@ The [development guide](docs/development.md) explains the project layout, test s
 
 Source is available under [PolyForm Noncommercial 1.0.0](LICENSE). Permitted noncommercial use includes reading, running, modifying and sharing. Distribution must include the license terms or their URL **and all `Required Notice:` lines**. Commercial use requires separate permission; the full license governs.
 
-This is a source-available project with a noncommercial restriction. Icons, music and effects were AI generated according to the author; generation-provider and usage-term records remain to be completed in the [asset notes](docs/assets.md).
+Music and sound effects are synthesized by code, and the icon is AI-generated; see the [asset notes](docs/assets.md).
 
 Issues and suggestions are welcome. Please include the mode, reproduction steps and environment, and remove personal data from logs or screenshots.
 
@@ -89,10 +91,10 @@ Issues and suggestions are welcome. Please include the mode, reproduction steps 
 
 此外还有庭院收藏、主题外观、撤回与提示，以及微信内的好友排行和分享卡片。
 
-**先试玩**：使用 Node.js 24 运行 `node tests/build-playable-preview.js --site`，打开 `dist/browser/index.html`。目前仅准备本地页面，尚未配置公开试玩网址。网页存档与微信独立；微信好友榜、真实广告、分享发送和游戏音频需要在微信中体验。
+**在线试玩**：<https://jackhuangzihao.github.io/moongate-blocks/>，打开浏览器就能玩。网页存档与微信独立；微信好友榜、广告、分享发送和游戏音频需要在微信中体验。也可以用 Node.js 24 运行 `node tests/build-playable-preview.js --site` 在本地生成。
 
-**开发和测试**：用微信开发者工具导入本目录；自动测试使用 `node tests/run.js`，无需安装依赖。全量测试会生成重力实验页面，建议在临时副本执行。详见[开发指南](docs/development.md)和[仓库文件清单](docs/repository-files.md)。
+**开发和测试**：用微信开发者工具导入本目录；自动测试使用 `node tests/run.js`，无需安装依赖，可直接在仓库里运行。详见[开发指南](docs/development.md)和[仓库文件清单](docs/repository-files.md)。
 
 **许可**：沿用 [PolyForm Noncommercial 1.0.0](LICENSE)。允许许可范围内的非商业查看、运行、修改和分享；分发时须提供许可条款或其网址，并保留所有 `Required Notice:` 声明。商业使用需另行取得许可，具体以完整条款为准。这是附有非商业限制的源码公开项目。
 
-图标、背景音乐和音效由作者确认为 AI 生成，来源记录见[素材说明](docs/assets.md)。本机历史上传记录不随仓库提供；GitHub 源码更新、网页发布、微信上传、提审和正式上线是不同操作。
+背景音乐和音效由程序合成，图标由 AI 生成，详见[素材来源](docs/assets.md)。

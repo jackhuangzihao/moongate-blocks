@@ -176,7 +176,7 @@
 - 运行前检查脚本的写入行为、输出目录及环境需求。
 - `tests/gravity-controller.test.js` 会调用 `tests/build-gravity-preview.js`，涉及 `docs/prototypes/gravity` 下的产物。
 - `tests/build-playable-preview.js` 会覆盖 `docs/previews` 下的相关试玩文件。
-- 该生成器使用 `--site` 时只写 `dist/browser/`，不覆盖开发预览；生成目录已忽略，公开托管须另行确认。
+- 该生成器使用 `--site` 时只写 `dist/browser/`，不覆盖开发预览；生成目录已忽略。推送到 `main` 后由 `.github/workflows/pages.yml` 测试通过再部署到 GitHub Pages，因此推送即会更新公开试玩页。
 - `tests/playable-startup.test.js` 自建系统临时目录生成页面并在结束后清理，不覆盖项目预览，也不依赖额外 Canvas 库。
 - 其他生成器分别检查，不能假设所有预览都写到同一目录。
 - 全量测试宜在独立临时副本运行，保留所需源码、`tests`、`assets`、`docs/prototypes` 等相对路径及必要输出目录。
