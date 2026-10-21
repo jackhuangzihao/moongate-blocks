@@ -76,7 +76,7 @@ Source is available under [PolyForm Noncommercial 1.0.0](LICENSE). Permitted non
 
 Music and sound effects are synthesized by code, and the icon is AI-generated; see the [asset notes](docs/assets.md).
 
-Issues and suggestions are welcome. Please include the mode, reproduction steps and environment, and remove personal data from logs or screenshots.
+Issues and suggestions are welcome. Please include the mode, reproduction steps and environment, and remove personal data from logs or screenshots. For security concerns, use the private reporting options in the [security policy](SECURITY.md).
 
 ---
 
