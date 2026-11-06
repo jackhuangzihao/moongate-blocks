@@ -235,6 +235,7 @@ function drawGameOver(ctx, layout, state) {
   text(ctx,run&&!won?'朋友将从本关初始棋盘尝试解法':resultSummary(state),layout.width/2,actions.restart.y-50,12);
   const focus=collectionFocus(state);
   const note=run&&!won&&hintSource(state)==='free'?'重试可用一次免费提示'
+    :!run&&state.rotationUsed?'本局使用旋转 · 成绩计入个人最佳'
     :!run&&fresh.length?`庭院新添「${collection.named(fresh[0])}」· 回首页看看`
     :focus?focus.text:collection.progressLine(state.collection,collection.totalStars(state.challengeProgress),run?'stars':'clears');
   text(ctx,state.savePending?(run && !special?'星级待保存，请稍候再退出':'进度待保存，请稍候再退出'):note,layout.width/2,actions.restart.y-28,12,COLORS.secondaryText);

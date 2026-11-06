@@ -84,7 +84,8 @@ function draw(ctx, layout) {
   ctx.fillStyle = COLORS.background; ctx.fillRect(0, 0, layout.width, layout.height);
   ctx.textAlign = 'center'; ctx.fillStyle = COLORS.text; ctx.font = '600 24px sans-serif';
   ctx.fillText('好友排行', layout.width / 2, a.previousMap.y - 24);
-  ctx.font = '600 18px sans-serif'; ctx.fillText(MODES[MODE_ORDER[modeIndex]].title, layout.width / 2, a.previousMap.y + 30);
+  const mode = MODE_ORDER[modeIndex];
+  ctx.font = '600 18px sans-serif'; ctx.fillText(mode === 'easy' ? '方庭 · 未旋转成绩' : MODES[mode].title, layout.width / 2, a.previousMap.y + 30);
   const labels = { previousMap: '‹', nextMap: '›', previousPage: '上一页', nextPage: '下一页', refresh: '重试 / 刷新', close: '返回' };
   for (const [name, label] of Object.entries(labels)) {
     const r = a[name]; ctx.fillStyle = COLORS.panel; roundedRect(ctx, r.x, r.y, r.width, r.height, 18); ctx.fill();

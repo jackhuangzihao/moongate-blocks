@@ -124,6 +124,7 @@ const initialMode = loadMode();
 const initialTray = createTray({ occupancy: 0 });
 const initialBestScores = {};
 MODE_ORDER.forEach(id => { initialBestScores[id] = loadBest(id); });
+const ROTATION_BEST_KEY = 'fangcunPersonalBestRotationV1';
 const state = {
   screen: 'menu',
   homeMode: 'garden',
@@ -142,6 +143,7 @@ const state = {
   best: initialBestScores[initialMode],
   startingBest: initialBestScores[initialMode],
   bestScores: initialBestScores,
+  rotationBest: storedScore(ROTATION_BEST_KEY),
   savedGames: saves.loadAll(wx),
   piecesPlaced: 0,
   maxCombo: 0,
@@ -553,10 +555,21 @@ function completedCells(completed) {
 
 function saveBestScore() {
   if (state.challenge || state.basics) return;
-  if (state.score <= state.best) return;
-  state.best = state.score;
-  state.bestScores[state.mode] = state.best;
-  persist(MODES[state.mode].bestKey, state.best);
+  if (state.mode === 'easy' && state.rotationUsed) {
+    if (state.score > state.rotationBest) {
+      state.rotationBest = state.score;
+      persist(ROTATION_BEST_KEY, state.rotationBest);
+    }
+  } else if (state.score > state.bestScores[state.mode]) {
+    state.bestScores[state.mode] = state.score;
+    persist(MODES[state.mode].bestKey, state.score);
+  }
+  state.best = personalBest();
+}
+
+function personalBest() {
+  const ranked = state.bestScores[state.mode];
+  return state.mode === 'easy' ? Math.max(ranked, state.rotationBest) : ranked;
 }
 
 function updateTrayAvailability() {
@@ -734,7 +747,10 @@ function saveCurrentGame() {
   const saved = state.gameOver ? null : saves.snapshot(state);
   if (saved) state.savedGames[state.mode] = saved;
   else delete state.savedGames[state.mode];
-  persist(saves.keyFor(state.mode), saved);
+  const needsRotation = saved && rotation.enabled(state) && (state.rotationUsed
+    || state.tray.every((piece, slot) => !piece || state.unavailableTray[slot]));
+  saves.writeCheckpoint(wx, state.mode, saved, needsRotation);
+  updateSaveStatus();
 }
 
 function finishTurn(trayIndex, deferAnimations = false) {
@@ -797,7 +813,7 @@ function restartGame(restored = null, challengeRun = null, guided = false) {
   layout = createLayout(windowInfo.windowWidth, windowInfo.windowHeight,
     windowInfo.safeArea, menuButtonRect, { ...MODES[state.mode], challenge: Boolean(challengeRun) });
   state.score = 0;
-  state.best = state.bestScores[state.mode];
+  state.best = personalBest();
   state.startingBest = state.best;
   state.piecesPlaced = 0;
   state.maxCombo = 0;
@@ -1105,7 +1121,13 @@ async function performVideoTool(kind) {
   if (kind==='hint' && state.gameOver) { notice('当前已结束，可以撤回或重试'); return; }
   const reward = kind==='undo' ? { budget: undoBudget.current(state) }
     : kind==='hint' ? gameTools.suggest(state) : gameTools.revivalCells(state);
-  if (!reward) { notice(state.challenge?'暂未找到可靠提示，可以撤回再试':'当前没有可用落点'); return; }
+  if (!reward) {
+    const rescueSlot = kind === 'hint' && rotation.enabled(state) && !state.rotationUsed
+      ? state.tray.findIndex(piece => rotation.canRescue(state.board, [piece])) : -1;
+    if (rescueSlot >= 0) showFeedback(`点选第 ${rescueSlot + 1} 块，旋转后可以继续落子`, 3500);
+    else notice(state.challenge?'暂未找到可靠提示，可以撤回再试':'当前没有可用落点');
+    return;
+  }
   const board = state.board;
   if (reward.undo) {
     // Explain the rollback before either consuming the gift or opening a video.
@@ -1785,7 +1807,9 @@ wx.onTouchEnd(event => {
       state.rotationPreview = null;
     }
     if (state.rotationPreview ? !state.rotationPreview.fits : state.unavailableTray[drag.trayIndex]) {
-      showFeedback('这个方向放不下，可以先试试旋转', 2600);
+      const original = state.tray[drag.trayIndex];
+      const canFit = !state.unavailableTray[drag.trayIndex] || rotation.canRescue(state.board, [original]);
+      showFeedback(canFit ? '这个方向放不下，可以试试另一个朝向' : '这块转了也放不下，请试试其他方块', 2600);
     }
     invalidateScene();
     return;

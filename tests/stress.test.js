@@ -175,9 +175,11 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
    assert.ok(s.safetyGuaranteesRemaining>=0 && s.safetyGuaranteesRemaining<=MODES[id].rescues);
    same(s.unavailableTray,s.tray.map(shape=>Boolean(shape)&&!available(s.board,shape)),'availability mismatch');
    assert.strictEqual(s.gameOver,s.tray.every(shape=>!shape||!available(s.board,shape)) && !rescueMove(s));
-   assert.ok(s.best>=s.score);assert.strictEqual(storage[MODES[id].bestKey],s.best);
-   const checkpoint = storage[saveTools.keyFor(id)];
-   if (s.gameOver) assert.strictEqual(checkpoint,null);
+   assert.ok(s.best>=s.score);
+   assert.strictEqual(storage[MODES[id].bestKey] || 0,s.bestScores[id]);
+   if (!s.rotationUsed) assert.ok(s.bestScores[id]>=s.score);
+   const checkpoint = saveTools.loadAll(wx)[id];
+   if (s.gameOver) assert.strictEqual(checkpoint,undefined);
    else {
      assert.ok(saveTools.decode(checkpoint,id),'save cannot be restored');
      same(checkpoint,saveTools.snapshot(s),'save differs from settled game');
@@ -206,6 +208,6 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
 }
 } catch(error){console.error('Reproduce:',activeCase,'move',game.state.piecesPlaced);throw error;}
 const hash=crypto.createHash('sha256');for(const file of ['game.js','js/rules/board.js','js/rules/shapes.js','js/rules/rotation.js','js/config.js','js/persistence/saves.js'])hash.update(fs.readFileSync(path.join(root,file)));
-const report={games:games*15,totalMoves,noise,sourceSha256:hash.digest('hex'),results};
+const report={games:results.reduce((total, result) => total + result.games, 0),totalMoves,noise,sourceSha256:hash.digest('hex'),results};
 if(process.argv[3])fs.writeFileSync(process.argv[3],JSON.stringify(report,null,2)+'\n');
 console.log('PASS',JSON.stringify({games:report.games,totalMoves,rotatedMoves,noise}));

@@ -18,7 +18,8 @@ for (const original of SHAPES) {
 }
 
 const key = saves.keyFor('easy');
-const app = boot();
+const rankMessages = [];
+const app = boot({}, { api: { getOpenDataContext: () => ({ postMessage: message => rankMessages.push(message) }) } });
 app.run(`restartGame();
   state.tray = ['line3H', 'square2', 'dot'].map(id => SHAPES.find(shape => shape.id === id));
   updateTrayAvailability(); saveCurrentGame();`);
@@ -70,14 +71,23 @@ assert.equal(app.run('state.rotationPreview'), null, 'Returning to the original 
 rotate(app);
 assert.equal(drop(app, 0, 4, 3), true);
 assert.deepEqual(clone(app.run('state.board.slice(3,6).map(row=>row.slice(4,7))')), [[1,0,0],[1,0,0],[1,0,0]]);
-assert.equal(app.store[key].rotationUsed, true);
+assert.deepEqual(app.store[key], originalSave, 'An old client can resume the pre-rotation checkpoint');
+assert.equal(saves.loadAll({ getStorageSync: k => app.store[k] }).easy.rotationUsed, true);
+assert.equal(app.store.fangcunPersonalBestRotationV1, 3);
+assert.equal(app.store.fangcunBestV2Easy, undefined);
 assert.ok(app.draw().some(label => label.text === '本局已用'));
+app.handlers.Hide();
+assert.ok(rankMessages.every(message => message.type !== 'sync' || !message.scores.fangcunBestV2Easy));
 const resumed = boot(clone(app.store));
 resumed.run('continueOrStartGame()');
 assert.equal(resumed.run('state.rotationUsed'), true);
 resumed.run('undoMove()');
 assert.equal(resumed.run('state.rotationUsed'), false);
 assert.deepEqual(clone(resumed.run('state.board')), originalSave.board);
+assert.equal(drop(resumed, 2, 0, 0), true);
+assert.equal(resumed.run('state.best'), 3, 'The higher personal rotation record is retained');
+resumed.handlers.Hide();
+assert.ok(rankMessages.some(message => message.type === 'sync' && message.scores.fangcunBestV2Easy === 1));
 
 const rescueBoard = ['001111100','010011000','000001110','011111111','001110101','010011100','011110100','011101011','010101111']
   .map(row => Array.from(row, Number));
@@ -86,13 +96,24 @@ assert.equal(board.hasAnyPlacement(rescueBoard, zig), false);
 assert.equal(rotation.canRescue(rescueBoard, [null, null, zig]), true);
 const rescue = boot();
 rescue.run(`restartGame(); state.board=${JSON.stringify(rescueBoard)}; state.board[0][2]=0;
-  state.tray = ['dot', null, 'zig4V'].map(id=>SHAPES.find(shape=>shape.id===id)||null);
-  updateTrayAvailability();`);
+  state.tray = ['dot', 'rect6H', 'zig4V'].map(id=>SHAPES.find(shape=>shape.id===id)||null);
+  updateTrayAvailability(); saveCurrentGame();`);
+const legacyCheckpoint = clone(rescue.store[key]);
 assert.equal(drop(rescue, 0, 2, 0), true);
 assert.equal(rescue.run('state.gameOver'), false);
 assert.ok(rescue.draw().some(label => label.text.includes('点选方块试试旋转')));
-assert.ok(saves.decode(rescue.store[key], 'easy'), 'A position saved with rotation as its only move can resume');
-assert.equal(saves.decode({ ...rescue.store[key], rotationUsed: true }, 'easy'), null);
+const rescueCheckpoint = saves.loadAll({ getStorageSync: k => rescue.store[k] }).easy;
+assert.ok(saves.decode(rescueCheckpoint, 'easy'), 'A position saved with rotation as its only move can resume');
+assert.equal(saves.decode({ ...rescueCheckpoint, rotationUsed: true }, 'easy'), null);
+assert.deepEqual(rescue.store[key], legacyCheckpoint);
+select(rescue, 1);
+assert.equal(rescue.run('state.feedback'), '这块转了也放不下，请试试其他方块');
+select(rescue, 2);
+assert.equal(rescue.run('state.feedback'), '这个方向放不下，可以试试另一个朝向');
+rescue.run('state.videoToolsEnabled=true; requestVideoTool("hint")');
+assert.equal(rescue.run('state.feedback'), '点选第 3 块，旋转后可以继续落子');
+const oldProgress = { ...clone(rescue.store), [key]: { ...legacyCheckpoint, score: legacyCheckpoint.score + 1 } };
+assert.equal(saves.loadAll({ getStorageSync: k => oldProgress[k] }).easy.score, oldProgress[key].score);
 const reopened = boot(clone(rescue.store));
 reopened.run('continueOrStartGame()');
 select(reopened, 2);
@@ -102,6 +123,18 @@ const [col, row] = reopened.run(`(()=>{
 })()`);
 assert.equal(drop(reopened, 2, col, row), true);
 assert.equal(reopened.run('state.rotationUsed'), true);
+assert.deepEqual(reopened.store[key], legacyCheckpoint);
+
+// Failed replacement writes cannot remove a readable recovery checkpoint.
+const fault = { write: false };
+const failing = boot(clone(rescue.store), { fault });
+failing.run('continueOrStartGame()');
+fault.write = true;
+failing.run('restartGame()');
+assert.deepEqual(saves.loadAll({ getStorageSync: k => failing.store[k] }).easy, rescueCheckpoint);
+fault.write = false;
+failing.handlers.Hide();
+assert.equal(saves.loadAll({ getStorageSync: k => failing.store[k] }).easy.piecesPlaced, 0);
 
 // The drag hint on a rotating board is shown once, then stays quiet.
 {

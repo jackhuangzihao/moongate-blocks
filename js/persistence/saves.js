@@ -2,11 +2,34 @@ const { MODES, MODE_ORDER } = require('../config');
 const { SHAPES } = require('../rules/shapes');
 const undoBudget = require('../rules/undo-budget');
 const rotation = require('../rules/rotation');
+const storage = require('./storage');
 const { createBoard, energyPalacePool, findCompletedRegions, hasAnyPlacement } = require('../rules/board');
 
 const FIELDS = ['score', 'startingBest', 'piecesPlaced', 'maxCombo', 'combo', 'energy',
   'luckyPendingCount', 'safetyGuaranteesRemaining'];
 const keyFor = mode => `fangcunSaveV1:${MODES[mode].bestKey}`;
+const ROTATION_CHECKPOINT = 'fangcunRotationCheckpointV1';
+
+function checkpointIdentity(save) {
+  if (!save || typeof save !== 'object') return null;
+  const budget = save.undoBudget;
+  return JSON.stringify([budget?.attemptId, budget?.spent, budget?.grants, save.randomState,
+    save.piecesPlaced, save.score, save.board, save.tray, Boolean(save.reviveUsed)]);
+}
+
+function writeCheckpoint(api, mode, save, needsRotation) {
+  const key = keyFor(mode);
+  if (mode === 'easy' && save && needsRotation) {
+    // Older clients keep the last turn playable under their original rules.
+    const anchor = checkpointIdentity(storage.read(api, key));
+    storage.write(api, ROTATION_CHECKPOINT, { anchor, save });
+    return;
+  }
+  // Keep the recovery checkpoint if writing its replacement fails.
+  if (storage.write(api, key, save) && mode === 'easy' && storage.read(api, ROTATION_CHECKPOINT)) {
+    storage.write(api, ROTATION_CHECKPOINT, null);
+  }
+}
 
 // Keep at most three preceding turns; no unbounded recursive save payloads.
 function history(save, depth = 3) {
@@ -91,15 +114,22 @@ function decode(save, modeId, previousDepth = 3) {
   return restored;
 }
 
-function loadAll(storage) {
+function loadAll(api) {
   const saves = {};
   MODE_ORDER.forEach(id => {
     try {
-      const save = storage.getStorageSync(keyFor(id));
+      let save = api.getStorageSync(keyFor(id));
+      if (id === 'easy') {
+        const checkpoint = storage.read(api, ROTATION_CHECKPOINT);
+        // If the old client played another turn or started over, its progress wins.
+        if (checkpoint && checkpoint.anchor === checkpointIdentity(save) && decode(checkpoint.save, id, 0)) {
+          save = checkpoint.save;
+        }
+      }
       if (decode(save, id)) saves[id] = save;
     } catch (error) { /* An unreadable save must not block starting a new game. */ }
   });
   return saves;
 }
 
-module.exports = { keyFor, snapshot, decode, loadAll, history };
+module.exports = { keyFor, snapshot, decode, loadAll, history, writeCheckpoint };
