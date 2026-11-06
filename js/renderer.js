@@ -8,6 +8,7 @@ const {
   drawDraggedShape,
   drawMechanicGuide,
   drawEnergy,
+  drawRotation,
   drawSuggestion,
   drawTray
 } = require('./views/board-view');
@@ -50,10 +51,12 @@ const mechanicGuide = require('./progression/mechanic-guide');
 const basics = require('./progression/basics');
 const sharing = require('./platform/sharing');
 const undoBudget = require('./rules/undo-budget');
+const rotation = require('./rules/rotation');
 const goals = require('./progression/goals');
 const { roundedRect, text, pressedRect, button, drawSettingsIcon } = require('./views/canvas-ui');
 const { drawTarget } = require('./views/board-symbols');
 const themes = require('./views/themes');
+const clearFeedback = require('./views/clear-feedback');
 const { drawAppearance } = require('./views/appearance-view');
 
 function challengeTarget(run) {
@@ -70,7 +73,8 @@ function drawHeader(ctx, layout, state) {
   text(ctx,run?`${run.invited?'好友挑战':run.dailyDate?'每日精选':`第 ${challenges.level(run.level).number} 关`} · ${level.title}`:'清雅庭院',layout.width/2,layout.settingsY+30,17,COLORS.text,'center','600');
   drawSettingsIcon(ctx,pressedRect(state,'game-settings',getSettingsButton(layout)),COLORS.secondaryText);
   text(ctx,run?`${target.name}还差`:state.gardenIntro?'教学不计分':'本局分数',x,layout.scoreY-30,11,COLORS.secondaryText,'left');
-  text(ctx,run?`${target.remaining} ${target.unit}`:state.score,x,layout.scoreY,run?28:32,COLORS.text,'left','600');
+  clearFeedback.drawValue(ctx,run?`${target.remaining} ${target.unit}`:state.score,x,layout.scoreY,
+    run?28:32,COLORS.text,state.clearFeedback,getChallengeActions(layout,state).undo.x-x-8);
   text(ctx,run?'剩余步数':MODES[state.mode].title+' · 个人最佳',layout.width-x,layout.scoreY-30,11,COLORS.secondaryText,'right');
   text(ctx,run?`${Math.max(0,level.limit-run.history.length)} 步`:state.best,layout.width-x,layout.scoreY,run?28:19,COLORS.text,'right','600');
   const actions = getChallengeActions(layout, state);
@@ -100,9 +104,13 @@ function drawHeader(ctx, layout, state) {
     x+(marked?35:13),y+(run?19:18),layout.width-x*2-(marked?35:13)-72);
   const near=nearbyEnergy(state);
   const lessonMove=mechanicGuide.move(state.mechanicGuide,run);
-  const detail=state.feedback || (run
+  const effect = state.clearFeedback;
+  const showGain = effect && effect.showGain!==false && (!state.feedback || state.feedback===effect.label);
+  const detail=state.feedback || (showGain ? effect.label : '') || (run
     ? lessonMove?'把下方描边方块拖到虚线处，试试看':state.mechanicGuide?state.mechanicGuide.lines[0]:starNote
     : state.gardenIntro?'把下方方块拖到虚线处，填满这个 3×3 九宫'
+    : rotation.enabled(state) && !state.rotationUsed && state.tray.every((shape,i)=>!shape || state.unavailableTray?.[i])
+    ? '原朝向都放不下 · 点选方块试试旋转'
     : near?`充能九宫还差 ${near.missing} 格 · 填满可充能`
     : state.energyGuideVisible && !state.tutorialVisible?'清除 ✦ 九宫集能量，满三点后下一组送幸运方块'
     : state.tutorialVisible?'拖动方块，填满一行、一列或九宫试试看'
@@ -110,7 +118,8 @@ function drawHeader(ctx, layout, state) {
     : '不限时 · 托盘都放不下时结束');
   ctx.font='11px sans-serif';ctx.fillStyle=COLORS.secondaryText;ctx.textAlign='left';
   const collapsedGuide=state.mechanicGuide && state.mechanicGuide.collapsed;
-  ctx.fillText(detail,x+13,y+35,layout.width-x*2-26-(collapsedGuide?56:0));
+  ctx.fillText(detail,x+13,y+35,layout.width-x*2-26-(collapsedGuide?56:0)-(showGain?clearFeedback.gainWidth(effect):0));
+  if(showGain)clearFeedback.drawGain(ctx,effect,layout.width-x-13-(collapsedGuide?56:0),y+35,COLORS.energyText);
   if(collapsedGuide)text(ctx,'展开',layout.width-x-13,y+35,11,COLORS.accent,'right','600');
   text(ctx,run?`${Math.min(run.progress,level.target)} / ${level.target} ⓘ`:'规则 ⓘ',layout.width-x-13,y+18,12,COLORS.accent,'right','600');
 }
@@ -128,6 +137,12 @@ function drawDynamicLayer(ctx, layout, state) {
   if (state.screen === 'playing'
     && (!state.gameOver || state.clearingCells.length || (state.breakingIce || []).length)
     && !state.settingsOpen && !state.helpOpen && !state.confirmAction && !state.playPanel) {
+    if(state.clearFeedback && !state.basics){
+      // Redraw only the header while numbers move; keep the board's static cache intact.
+      ctx.fillStyle=COLORS.background;
+      ctx.fillRect(0,layout.settingsY,layout.width,layout.boardY-layout.settingsY-8);
+      drawHeader(ctx,layout,state);
+    }
     drawClearAnimation(ctx, layout, state);
     drawIceAnimation(ctx, layout, state);
     if(state.mechanicGuide && !state.drag)drawMechanicGuide(ctx,layout,state);
@@ -327,6 +342,7 @@ function renderScene(ctx, layout, state) {
     drawHeader(ctx, layout, state);
     drawBoard(ctx, layout, state);
     drawEnergy(ctx, layout, state);
+    drawRotation(ctx, layout, state);
     drawTray(ctx, layout, state);
     drawSuggestion(ctx, layout, state);
   }

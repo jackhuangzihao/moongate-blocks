@@ -4,6 +4,7 @@ const G=require('./gravity-engine');
 const {celebration}=require('../views/art');
 const dragPlacement=require('../views/drag-placement');
 const themes=require('../views/themes');
+const clearFeedback=require('../views/clear-feedback');
 function rect(x,y,width,height){return {x,y,width,height};}
 function layoutFor(layout,demo=false){
  const width=Math.min(342,layout.width-40),x=(layout.width-width)/2,top=layout.settingsY,bottom=layout.height-layout.safeBottom-16;
@@ -41,7 +42,11 @@ function draw(ctx,layout,model,pressed,appearanceId='classic'){
  button(ctx,v.buttons.back,'‹ 返回',pressed,'gravity-back',C);
  drawSettingsIcon(ctx,pressedRect({pressedButton:pressed},'settings',getSettingsButton(layout)),C.muted);
  ctx.fillStyle=C.text;ctx.font='500 24px serif';ctx.textAlign='center';ctx.fillText('落玉庭',center,v.top+29);
- text(ctx,demo?'玩法演示 · 拖横条补齐底行':`${run.score} 分 · 最长 ${run.chain} 连锁 · 最佳 ${model.best}`,center,v.top+54,12,C.muted);
+ const effect=!demo&&!model.rulesOpen&&!model.confirmRestart&&model.clearFeedback;
+ if(effect){
+  clearFeedback.drawValue(ctx,`${effect.baseScore+effect.gain} 分`,v.x,v.top+54,16,C.text,effect,v.width-clearFeedback.gainWidth(effect)-48);
+  clearFeedback.drawGain(ctx,effect,v.x+v.width,v.top+54,C.energyText,'本次 ');
+ }else text(ctx,demo?'玩法演示 · 拖横条补齐底行':`${run.score} 分 · 最长 ${run.chain} 连锁 · 最佳 ${model.best}`,center,v.top+54,12,C.muted);
  if(!demo)button(ctx,v.buttons.undo,run.undoUsed?'撤回已用完':'撤回 · 1 次',pressed,'gravity-undo',C,false,!model.animation&&!run.over&&!run.undoUsed&&Boolean(run.previous));
  button(ctx,v.buttons.retry,demo?'重看演示':run.over?'再来一局':'重新开始',pressed,'gravity-retry',C,!demo&&run.over);
  button(ctx,v.buttons.next,demo?(run.won?'开始游戏':'跳过演示'):run.over?'挑战朋友':'玩法说明',pressed,'gravity-next',C,demo);
@@ -51,7 +56,8 @@ function draw(ctx,layout,model,pressed,appearanceId='classic'){
  const frame=model.animation&&model.animation.frames[model.animation.index],t=frame?model.animation.progress:1,board=frame?frame.before:run.board;
  for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(board[r][c]){
   if(frame&&frame.kind==='fall'&&frame.movements.some(m=>m.c===c&&m.from===r))continue;
-  tile(c,r,C.block,frame&&frame.kind==='clear'&&!frame.after[r][c]?1-t:1);
+  const clearing=frame&&frame.kind==='clear'&&!frame.after[r][c];
+  tile(c,r,clearing&&t<.4?C.clearGlow:C.block,clearing?1-t:1);
  }
  if(frame&&frame.kind==='fall')frame.movements.forEach(m=>tile(m.c,m.from+(m.to-m.from)*(1-(1-t)**2),C.block));
  const drag=model.drag;

@@ -32,7 +32,7 @@ function load(file) {
   return module.exports;
 }
 sandbox.require = name => name === './js/platform/feedback' ? feedback : load(path.resolve(root,name+'.js'));
-vm.runInContext(fs.readFileSync(path.join(root,'game.js'),'utf8') + '\nthis.gameTest={state,restartGame,stepAnimations,updateDrag,layout:()=>layout,present};',sandbox);
+vm.runInContext(fs.readFileSync(path.join(root,'game.js'),'utf8') + '\nthis.gameTest={state,restartGame,stepAnimations,getRotationAction,layout:()=>layout,present};',sandbox);
 const game = sandbox.gameTest;
 const {MODES,MODE_ORDER}=load(path.join(root,'js/config.js'));
 const engine = load(path.join(root,'js/rules/board.js'));
@@ -48,6 +48,23 @@ function legal(board,shape,c,r) {
 function available(board,shape) {
   for(let r=0;r<board.length;r++)for(let c=0;c<board[0].length;c++)if(legal(board,shape,c,r))return true;
   return false;
+}
+// Rotate using an independent coordinate transform so the stress run can catch
+// regressions in both the placement and the game-over rule.
+function rescueMove(state) {
+  if (state.mode !== 'easy' || state.rotationUsed) return null;
+  for (const [index, original] of state.tray.entries()) {
+    if (!original) continue;
+    let shape = original;
+    for (let turns = 1; turns <= 3; turns += 1) {
+      const height = Math.max(...shape.cells.map(cell => cell[1])) + 1;
+      shape = { ...shape, cells: shape.cells.map(([col, row]) => [height - 1 - row, col]) };
+      for (let r = 0; r < state.board.length; r += 1) for (let c = 0; c < state.board[0].length; c += 1) {
+        if (legal(state.board, shape, c, r)) return { shape, index, r, c, turns };
+      }
+    }
+  }
+  return null;
 }
 // Independent oracle: enumerate regions as coordinate sets rather than call game clear helpers.
 function expectedClear(board) {
@@ -92,7 +109,7 @@ function choose(policy) {
   return best;
 }
 const results=[],noise={invalid:0,cancel:0,background:0,multitouch:0,locked:0};
-let totalMoves=0, activeCase='';
+let totalMoves=0, rotatedMoves=0, activeCase='';
 try {
 for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE_ORDER.entries()){
  const summary={mode:id,strategy:policy,games,steps:0,score:0,regions:0,energy:0,chargedGames:0,deliveredGames:0,pendingAtDeath:0,rescues:0,maxSteps:0};
@@ -103,9 +120,17 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
   const base=s.board.map(row=>row.slice());let charged=false,delivered=false;
   while(!s.gameOver){
    assert.ok(s.piecesPlaced<2000,'runaway game '+activeCase);
-   const move=choose(policy);assert.ok(move,'false live game');
+   const move=choose(policy) || rescueMove(s);assert.ok(move,'false live game');
    const initialScore=s.score, initialBoard=JSON.stringify(s.board), initialSteps=s.piecesPlaced;
    const start=startAt(move.index);
+   if (move.turns) {
+    handlers.TouchStart(event(start));handlers.TouchEnd({touches:[],changedTouches:[start]});
+    const action=game.getRotationAction(game.layout(),s);
+    const button={clientX:action.x+action.width/2,clientY:action.y+action.height/2,identifier:1};
+    for (let i=0;i<move.turns;i++) {
+     handlers.TouchStart(event(button));handlers.TouchEnd({touches:[],changedTouches:[button]});tick();
+    }
+   }
    if(totalMoves%17===0){
     handlers.TouchStart(event(start));handlers.TouchEnd({touches:[],changedTouches:[{...start,clientX:-100,clientY:-100}]});
     assert.strictEqual(JSON.stringify(s.board),initialBoard);assert.strictEqual(s.score,initialScore);noise.invalid++;
@@ -135,6 +160,7 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
    const refresh=s.tray.filter(Boolean).length===1;
    const lastCombo=s.combo;
    handlers.TouchEnd({touches:[],changedTouches:[end]});
+   if (move.turns) { assert.ok(s.rotationUsed);rotatedMoves++; }
    if(s.inputLocked){handlers.TouchStart(event(startAt((move.index+1)%3)));assert.strictEqual(s.drag,null);noise.locked++;}
    tick();tick();
    for(const key of oracle.cleared)predicted[Math.floor(key/predicted[0].length)][key%predicted[0].length]=0;
@@ -148,7 +174,7 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
    assert.ok(!s.inputLocked && !s.drag,'input stuck');
    assert.ok(s.safetyGuaranteesRemaining>=0 && s.safetyGuaranteesRemaining<=MODES[id].rescues);
    same(s.unavailableTray,s.tray.map(shape=>Boolean(shape)&&!available(s.board,shape)),'availability mismatch');
-   assert.strictEqual(s.gameOver,s.tray.every((shape,i)=>!shape||s.unavailableTray[i]));
+   assert.strictEqual(s.gameOver,s.tray.every(shape=>!shape||!available(s.board,shape)) && !rescueMove(s));
    assert.ok(s.best>=s.score);assert.strictEqual(storage[MODES[id].bestKey],s.best);
    const checkpoint = storage[saveTools.keyFor(id)];
    if (s.gameOver) assert.strictEqual(checkpoint,null);
@@ -179,7 +205,7 @@ for(const policy of ['greedy','random','energy'])for(const [modeIndex,id]of MODE
  results.push(summary);console.log(JSON.stringify(summary));
 }
 } catch(error){console.error('Reproduce:',activeCase,'move',game.state.piecesPlaced);throw error;}
-const hash=crypto.createHash('sha256');for(const file of ['game.js','js/rules/board.js','js/rules/shapes.js','js/config.js','js/persistence/saves.js'])hash.update(fs.readFileSync(path.join(root,file)));
+const hash=crypto.createHash('sha256');for(const file of ['game.js','js/rules/board.js','js/rules/shapes.js','js/rules/rotation.js','js/config.js','js/persistence/saves.js'])hash.update(fs.readFileSync(path.join(root,file)));
 const report={games:games*15,totalMoves,noise,sourceSha256:hash.digest('hex'),results};
 if(process.argv[3])fs.writeFileSync(process.argv[3],JSON.stringify(report,null,2)+'\n');
-console.log('PASS',JSON.stringify({games:report.games,totalMoves,noise}));
+console.log('PASS',JSON.stringify({games:report.games,totalMoves,rotatedMoves,noise}));

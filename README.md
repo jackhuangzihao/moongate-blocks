@@ -26,7 +26,7 @@ Plain JavaScript, CommonJS and Canvas 2D. The WeChat game needs no framework, pa
 
 ## Gameplay
 
-- **Free play (自由消除)** — three boards: an open 9×9, a blocked centre, and five star-point obstacles. Clear marked palaces to charge energy and earn a small lucky piece.
+- **Free play (自由消除)** — three boards: an open 9×9, a blocked centre, and five star-point obstacles. On the open board you may rotate one piece per game. Clear marked palaces to charge energy and earn a small lucky piece.
 - **Challenge (目标闯关)** — 90 levels in five chapters, with fixed decks and move limits. Ice needs two clears; stones and gates add constraints. Finish in fewer moves for more stars.
 - **Daily pick (每日精选)** — one curated challenge each day.
 - **Gravity (落玉庭)** — clears let blocks fall and trigger chain clears. Six teaching puzzles lead into free play.
@@ -57,7 +57,7 @@ Tests use Node's built-in modules, with nothing to install:
 node tests/run.js
 ```
 
-All 39 suites cover rules, saves, every level's reference solution, hints, input, layout, colours, browser startup and a random-play stress run. The only file they write inside the project is a git-ignored gravity preview, so the working tree stays clean. GitHub Actions runs the same suites on every push.
+All 41 suites cover rules, saves, every level's reference solution, hints, input, layout, colours, browser startup and a random-play stress run. The only file they write inside the project is a git-ignored gravity preview, so the working tree stays clean. GitHub Actions runs the same suites on every push.
 
 See the [development guide](docs/development.md) for the project layout and platform notes, and the [repository file guide](docs/repository-files.md) for what is and isn't tracked.
 
@@ -84,7 +84,7 @@ Issues and suggestions are welcome. Please include the mode, reproduction steps 
 
 《方寸九宫》是一款庭院风格的微信小游戏：把方块放进 9×9 棋盘，填满整行、整列或一个 3×3 宫格即可消除。
 
-- **自由消除**：方庭、石台、星位三种棋盘，消除目标宫可充能，获得幸运小方块。
+- **自由消除**：方庭、石台、星位三种棋盘，方庭每局可旋转一块方块；消除目标宫可充能，获得幸运小方块。
 - **目标闯关**：五章共 90 关，固定发牌、限步达标，包含薄冰、圆石和门等机关。
 - **每日精选**：每天一道精选关卡。
 - **落玉庭**：消除后方块下落，可继续触发连锁；先有 6 道教学题，再进入自由模式。

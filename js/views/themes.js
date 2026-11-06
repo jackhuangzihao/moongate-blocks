@@ -23,12 +23,12 @@ const palettes = Object.freeze({ classic, ink, neon });
 const gravityClassic = Object.freeze({ bg: '#FAF9F2', panel: '#FAF9F2', text: '#355849', muted: '#637464',
   block: '#7EAA91', edge: '#DCE2D2', empty: '#EDF0E3', alt: '#F6F5E9', tray: '#F0F0E7', selected: '#E2E8D7',
   piece: '#6C9B83', unavailable: '#855B47', primary: '#386551', clearGlow: '#FFF3D6',
-  palaceLine: '#879C89', palaceActive: '#A18348', button: '#FFFFFF', onPrimary: '#FFFFFF' });
+  palaceLine: '#879C89', palaceActive: '#A18348', button: '#FFFFFF', onPrimary: '#FFFFFF', energyText: classic.energyText });
 function gravityPalette(p) {
   return Object.freeze({ bg: p.background, panel: p.panel, text: p.text, muted: p.secondaryText,
     block: p.block, edge: p.trayBackground, empty: p.emptyCell, alt: p.panel, tray: p.trayBackground,
     selected: p.traySelected, piece: p.block, unavailable: p.alertText, primary: p.primaryButton,
-    clearGlow: p.clearGlow, palaceLine: p.palaceLine, palaceActive: p.energy, button: p.panel, onPrimary: p.onPrimary });
+    clearGlow: p.clearGlow, palaceLine: p.palaceLine, palaceActive: p.energy, button: p.panel, onPrimary: p.onPrimary, energyText:p.energyText });
 }
 const gravityPalettes = Object.freeze({ classic: gravityClassic, ink: gravityPalette(ink), neon: gravityPalette(neon) });
 function idFor(state) { return state.appearancePreview || state.appearance && state.appearance.selected || 'classic'; }

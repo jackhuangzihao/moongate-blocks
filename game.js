@@ -1,7 +1,9 @@
 const { MODES, MODE_ORDER, REWARDED_AD_UNIT_ID } = require('./js/config');
 const gardenRules = require('./js/rules/garden-rules');
 const { createTray, SHAPES } = require('./js/rules/shapes');
+const rotation = require('./js/rules/rotation');
 const { createLayout } = require('./js/views/layout');
+const { getRotationAction } = require('./js/views/board-view');
 const {
   renderScene,
   drawDynamicLayer,
@@ -50,6 +52,7 @@ const sharing = require('./js/platform/sharing');
 const gameTools = require('./js/rules/tools');
 const undoBudget = require('./js/rules/undo-budget');
 const dragPlacement = require('./js/views/drag-placement');
+const clearFeedbackView = require('./js/views/clear-feedback');
 const { drawSettings, drawConfirm } = require('./js/views/panel-view');
 const rewardedAds = require('./js/platform/rewarded-ad').createRewardedAds(wx, REWARDED_AD_UNIT_ID);
 let foreground = true;
@@ -173,6 +176,9 @@ const state = {
   safetyGuaranteesRemaining: MODES[initialMode].rescues,
   trayAppearProgress: 1,
   unavailableTray: [false, false, false],
+  rotationUsed: false,
+  rotationSlot: -1,
+  rotationPreview: null,
   drag: null,
   gameOver: false,
   gameOverProgress: 0,
@@ -181,6 +187,7 @@ const state = {
   breakingIce: [],
   openingGates: [],
   clearProgress: 0,
+  clearFeedback: null,
   feedback: '',
   feedbackUntil: 0,
   settingsOpen: false,
@@ -351,6 +358,14 @@ function stepAnimations(now) {
     invalidateScene();
   }
 
+  if (state.clearFeedback) {
+    if (!foreground || state.screen !== 'playing' || state.settingsOpen || state.helpOpen
+      || state.confirmAction || state.playPanel || !clearFeedbackView.advance(state.clearFeedback, now)) {
+      state.clearFeedback = null;
+      invalidateScene();
+    } else invalidateOverlay();
+  }
+
   if (clearAnimation) {
     const progress = Math.min(1, (now - clearAnimation.start) / CLEAR_DURATION);
     state.clearProgress = progress;
@@ -448,6 +463,8 @@ if (wx.onHide) {
   wx.onHide(() => {
     if(foreground && state.screen==='playing' && !state.gameOver && !state.rewardBusy)reportPlay('session_pause',{reason:'background'});
     foreground = false;
+    state.clearFeedback = null;
+    invalidateScene();
     state.appearancePreview = null;
     playerFeedback.sync(null);
     releaseStaleTouches();
@@ -575,6 +592,7 @@ function showFeedback(message, duration) {
 }
 
 function clearFeedback() {
+  state.clearFeedback = null;
   state.feedback = '';
   state.feedbackUntil = 0;
 }
@@ -737,7 +755,8 @@ function finishTurn(trayIndex, deferAnimations = false) {
   }
   updateTrayAvailability();
   const wasGameOver = state.gameOver;
-  state.gameOver = state.tray.every((shape, index) => !shape || state.unavailableTray[index]);
+  state.gameOver = state.tray.every((shape, index) => !shape || state.unavailableTray[index])
+    && !(rotation.enabled(state) && !state.rotationUsed && rotation.canRescue(state.board, state.tray));
   if (state.gameOver && !wasGameOver) {
     state.gameOverProgress = 0;
     analytics.report(wx, 'garden_result', { map: state.mode, score: state.score, pieces: state.piecesPlaced });
@@ -802,6 +821,9 @@ function restartGame(restored = null, challengeRun = null, guided = false) {
   state.tray = createBalancedTray(false);
   state.trayAppearProgress = 1;
   state.unavailableTray = [false, false, false];
+  state.rotationUsed = false;
+  state.rotationSlot = -1;
+  state.rotationPreview = null;
   state.drag = null;
   dragTouchId = null;
   state.gameOver = false;
@@ -1138,6 +1160,7 @@ async function performVideoTool(kind) {
       restartGame(null, withRunContext(state.challenge,reward.run));
       if (feedback.undoMove) feedback.undoMove();
     }
+    state.rotationPreview = null;
     state.suggestion = { slot: reward.slot, c: reward.c, r: reward.r };
     saveCurrentGame();
     showFeedback(reward.undo?`已退回 ${reward.undo} 步 · 从这里按虚线落子可通关`
@@ -1182,6 +1205,7 @@ function returnHome() {
 }
 function playChallenge(drag) {
   const oldProgress=state.challenge.progress;
+  const oldScore=state.challenge.score;
   const result = challenges.play(state.challenge, drag.trayIndex, drag.target.col, drag.target.row);
   if (!result) return;
   if(mechanicGuide.experienced(state.mechanicGuide,state.challenge,result,oldProgress))dismissMechanicGuide('experienced');
@@ -1206,13 +1230,16 @@ function playChallenge(drag) {
   state.clearProgress = 0;
   reportFirst('first_place');
   if (result.count) {
+    const clearTitle = clearFeedbackView.title(result.completed, state.combo);
+    state.clearFeedback = clearFeedbackView.create(state.score-oldScore,result.count,state.combo,Date.now(),clearTitle);
     recordFirstClear();
     // 通关音由结算面板统一播放，这里只表达"消掉了什么"。
     if (!run.won && result.wateredFlowers.some(flower=>flower[2]===0) && feedback.bloom) feedback.bloom();
     else if (result.brokenIce.length) { if (feedback.iceBreak) feedback.iceBreak(); }
     else feedback.elimination(state.combo, false, result.count);
     const watered=result.wateredFlowers || [];
-    showFeedback(state.challenge.won ? '目标完成 · 小径打通了' : result.openedGates.length ? `机关 ${[...new Set(result.openedGates.map(p=>p[2]))].join('、')} 已开启 · 新空间可以落子` : watered.length ? (watered.some(p=>p[2]===0)?'花开了 · 继续照料其他花圃':'花圃已浇灌 · 再在旁边消除一次') : result.brokenIce.length ? (challenges.level(run.level).kind==='ice' ? '薄冰已破 · 目标进度增加' : '薄冰已破 · 再消一次清除方块') : state.challenge.progress>oldProgress ? '漂亮，离目标更近了' : '腾出空间了 · 再看本关目标', 1800);
+    showFeedback(state.challenge.won ? '目标完成 · 小径打通了' : result.openedGates.length ? `机关 ${[...new Set(result.openedGates.map(p=>p[2]))].join('、')} 已开启 · 新空间可以落子` : watered.length ? (watered.some(p=>p[2]===0)?'花开了 · 继续照料其他花圃':'花圃已浇灌 · 再在旁边消除一次') : result.brokenIce.length ? (challenges.level(run.level).kind==='ice' ? '薄冰已破 · 目标进度增加' : '薄冰已破 · 再消一次清除方块') : clearTitle, 1800);
+    state.clearFeedback.showGain=state.feedback===clearTitle;
     state.inputLocked = true; clearAnimation = { start: Date.now() };
   } else { feedback.placement(); clearFeedback(); startTurnAnimations(); }
   saveCurrentGame(); invalidateScene();
@@ -1220,6 +1247,12 @@ function playChallenge(drag) {
 
 function updateDrag(point) {
   if (!state.drag) return;
+  const origin = state.drag.tapOrigin;
+  if (origin) {
+    if (Math.hypot(point.x - origin.x, point.y - origin.y) < 8) return;
+    state.drag.tapOrigin = null;
+    invalidateScene();
+  }
   const { bounds, shape } = state.drag;
   Object.assign(state.drag, dragPlacement.position(point, bounds, layout));
   const target = state.drag.target;
@@ -1625,11 +1658,31 @@ wx.onTouchStart(event => {
   if (tools.hint && pointInRect(point, tools.hint)) {
     startPress('tool-hint', () => requestVideoTool('hint'), tools.hint, started.identifier); return;
   }
+  const rotate = getRotationAction(layout, state);
+  if (pointInRect(point, rotate)) {
+    const original = state.tray[state.rotationSlot];
+    if (state.rotationUsed || !original) return;
+    const current = state.rotationPreview?.shape || original;
+    const turned = rotation.turn(current, original);
+    if (turned === current) return;
+    startPress('tool-rotate', () => {
+      state.rotationPreview = turned === original ? null : {
+        shape: turned, fits: hasAnyPlacement(state.board, turned)
+      };
+      state.suggestion = null;
+      showFeedback(state.rotationPreview ? '旋转后成功落子才会用掉次数' : '已转回原朝向 · 次数保留', 2100);
+    }, rotate, started.identifier);
+    return;
+  }
   const trayIndex = trayIndexAt(point.x, point.y);
   if (trayIndex < 0) return;
-  const shape = state.tray[trayIndex];
-  if (!shape) return;
-  if (state.unavailableTray[trayIndex]) {
+  const original = state.tray[trayIndex];
+  if (!original) return;
+  const canRotate = rotation.enabled(state) && !state.rotationUsed;
+  const preview = canRotate && state.rotationSlot === trayIndex ? state.rotationPreview : null;
+  const shape = preview ? preview.shape : original;
+  const unavailable = preview ? !preview.fits : state.unavailableTray[trayIndex];
+  if (unavailable && !(canRotate && rotation.turn(original) !== original)) {
     if (!state.unavailableHintSeen) {
       showFeedback('暂时无处可放，先试试其他方块', 2600);
       state.unavailableHintSeen = true;
@@ -1643,6 +1696,7 @@ wx.onTouchStart(event => {
   state.drag = {
     trayIndex,
     shape,
+    tapOrigin: canRotate ? point : null,
     bounds: shapeBounds(shape),
     x: point.x,
     y: point.y,
@@ -1653,7 +1707,7 @@ wx.onTouchStart(event => {
   };
   // 托盘里少了这一块，场景层必须重画一次；之后整段拖动都不再重画场景。
   invalidateScene();
-  updateDrag(point);
+  if (!canRotate) updateDrag(point);
 });
 
 // Once a finger drags, lifting it must never activate the card underneath.
@@ -1725,9 +1779,23 @@ wx.onTouchEnd(event => {
   state.drag = null;
   dragTouchId = null;
 
+  if (drag.tapOrigin) {
+    if (state.rotationSlot !== drag.trayIndex) {
+      state.rotationSlot = drag.trayIndex;
+      state.rotationPreview = null;
+    }
+    if (state.rotationPreview ? !state.rotationPreview.fits : state.unavailableTray[drag.trayIndex]) {
+      showFeedback('这个方向放不下，可以先试试旋转', 2600);
+    }
+    invalidateScene();
+    return;
+  }
   if (!drag.valid || !drag.target) {
-    if(!drag.target && !storage.read(wx,'fangcunFixedDirectionSeen')){
-      showFeedback('方块方向固定，按住并拖到棋盘空位',2600);saveHintSeen('fangcunFixedDirectionSeen');
+    // Rotating boards keep a separate flag, so the fixed-direction note still appears once elsewhere.
+    const dragHintKey = rotation.enabled(state) ? 'fangcunDragHintSeen' : 'fangcunFixedDirectionSeen';
+    if(!drag.target && !storage.read(wx,dragHintKey)){
+      showFeedback(rotation.enabled(state) ? '按住方块，拖到棋盘空位' : '方块方向固定，按住并拖到棋盘空位',2600);
+      saveHintSeen(dragHintKey);
     }
     if(drag.target){
       const cells=drag.shape.cells.map(([dx,dy])=>[drag.target.col+dx,drag.target.row+dy]);
@@ -1751,6 +1819,9 @@ wx.onTouchEnd(event => {
   before.previous=saves.history(before.previous,2);
   delete before.undoBudget;
   state.gardenUndo = before;
+  if (state.rotationPreview?.shape === drag.shape) state.rotationUsed = true;
+  state.rotationSlot = -1;
+  state.rotationPreview = null;
   placeShape(state.board, drag.shape, drag.target.col, drag.target.row);
   state.score += drag.shape.cells.length;
   state.piecesPlaced += 1;
@@ -1776,21 +1847,23 @@ wx.onTouchEnd(event => {
   const finishedIntro=state.gardenIntro;
   if(finishedIntro){state.gardenIntro=false;state.score=0;state.piecesPlaced=0;state.combo=0;state.maxCombo=0;state.gardenUndo=null;}
   feedback.elimination(state.combo, energyResult.charges > 0, regionCount);
+  const clearTitle = clearFeedbackView.title(completed, state.combo);
+  state.clearFeedback = finishedIntro ? null : clearFeedbackView.create(
+    state.score-before.score,regionCount,state.combo,Date.now(),clearTitle);
   if (energyResult.charges > 0) {
     showFeedback('幸运方块已充能');
   } else if (regionCount >= 2) {
-    const label = regionCount === 2 ? '双重消除'
-      : (regionCount === 3 ? '三重消除' : `${regionCount}重消除`);
-    showFeedback(`${label} +${simultaneousClearScore(regionCount)}`);
+    showFeedback(clearTitle);
   } else if (energyResult.gained > 0) {
     showFeedback(state.combo >= 2
-      ? `能量 +${energyResult.gained} · COMBO ×${state.combo}`
+      ? `能量 +${energyResult.gained} · 连续消除 ${state.combo} 手`
       : `能量 +${energyResult.gained}`);
   } else {
-    showFeedback(state.combo >= 2 ? `COMBO ×${state.combo}` : '漂亮！');
+    showFeedback(clearTitle);
   }
   if (addedDecor.length) showFeedback(`庭院新添「${addedDecor.map(collection.named).join('、')}」· 回首页看看`, 3200);
   if(finishedIntro)showFeedback('首次消除完成 · 修竹已解锁，金色小块送给你',5000);
+  if(state.clearFeedback)state.clearFeedback.showGain=state.feedback===clearTitle;
   state.clearingCells = completedCells(completed);
   state.clearProgress = 0;
   // Commit and save the settled turn before the visual effect: interruption during

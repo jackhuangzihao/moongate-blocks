@@ -1,11 +1,13 @@
 const challenges = require('../challenge/challenges');
+const rotation = require('../rules/rotation');
 
 // Rule explanations are independent of a solution, so revisiting them costs no hint.
 function describe(state) {
   const run = state.challenge;
+  const canRotate = rotation.enabled(state);
   if (!run) return { title:'这一局怎么玩', goal:'腾出空间，挑战更高分', example:'palaces',
-    lines:['方向固定，拖动方块填满行、列或 3×3 九宫。','不限时，没有必须达到的通关分数。',
-      '托盘里的方块全都放不下时，本局结束。','累计消除可以解锁庭院里的花木。'],
+    lines:[canRotate ? '拖动方块填满行、列或九宫；每局可旋转一块。' : '方向固定，拖动方块填满行、列或 3×3 九宫。','不限时，没有必须达到的通关分数。',
+      canRotate ? '没有可用落点时，本局结束。' : '托盘里的方块全都放不下时，本局结束。','累计消除可以解锁庭院里的花木。'],
     caption:'例：补齐九宫 → 九格一起消除' };
   const level = challenges.level(run.level);
   const rules = {

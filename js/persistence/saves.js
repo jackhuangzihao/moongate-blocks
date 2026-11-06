@@ -1,6 +1,7 @@
 const { MODES, MODE_ORDER } = require('../config');
 const { SHAPES } = require('../rules/shapes');
 const undoBudget = require('../rules/undo-budget');
+const rotation = require('../rules/rotation');
 const { createBoard, energyPalacePool, findCompletedRegions, hasAnyPlacement } = require('../rules/board');
 
 const FIELDS = ['score', 'startingBest', 'piecesPlaced', 'maxCombo', 'combo', 'energy',
@@ -26,6 +27,7 @@ function snapshot(state) {
     energyPalaces: state.energyPalaces.slice(), recentShapeIds: state.recentShapeIds.slice(),
     tray: state.tray.map(shape => shape ? { id: shape.id, lucky: Boolean(shape.lucky) } : null) };
   FIELDS.forEach(key => { save[key] = state[key]; });
+  if (rotation.enabled(state) && state.rotationUsed) save.rotationUsed = true;
   return save;
 }
 
@@ -58,7 +60,10 @@ function decode(save, modeId, previousDepth = 3) {
     if (!shape || (piece.lucky && shape.cells.length > 2)) return null;
     tray.push({ ...shape, lucky: piece.lucky });
   }
-  if (!tray.some(shape => shape && hasAnyPlacement(save.board, shape))) return null;
+  const canRotate = rotation.enabled({ mode: modeId, gardenIntro: save.gardenIntro === true });
+  const rotationUsed = canRotate && save.rotationUsed === true;
+  if (!tray.some(shape => shape && hasAnyPlacement(save.board, shape))
+    && !(canRotate && !rotationUsed && rotation.canRescue(save.board, tray))) return null;
   if (!Array.isArray(save.recentShapeIds) || save.recentShapeIds.length > 6
     || !save.recentShapeIds.every(id => SHAPES.some(shape => shape.id === id))) return null;
   const palaces = save.energyPalaces, pool = energyPalacePool(modeId);
@@ -77,6 +82,7 @@ function decode(save, modeId, previousDepth = 3) {
   const restored = { undoBudget: undoBudget.normalize(save.undoBudget), gardenIntro:save.gardenIntro===true, sessionClears:save.sessionClears || 0, randomState, reviveUsed: save.reviveUsed === true, gardenUndo: null, welcomeEnergy: save.welcomeEnergy === true, board: save.board.map(row => row.slice()), tray,
     energyPalaces: palaces.slice(), recentShapeIds: save.recentShapeIds.slice() };
   FIELDS.forEach(key => { restored[key] = save[key]; });
+  restored.rotationUsed = rotationUsed;
   if (previousDepth > 0 && save.previous && save.previous.piecesPlaced === save.piecesPlaced-1
     && Boolean(save.previous.reviveUsed) === restored.reviveUsed) {
     const previous = decode(save.previous, modeId, previousDepth - 1);

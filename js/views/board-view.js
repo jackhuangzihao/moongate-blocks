@@ -1,8 +1,9 @@
 const { COLORS, MODES } = require('../config');
 const challenges = require('../challenge/challenges');
 const mechanicGuide = require('../progression/mechanic-guide');
+const rotation = require('../rules/rotation');
 const dragPlacement = require('./drag-placement');
-const { roundedRect, text } = require('./canvas-ui');
+const { roundedRect, text, pressedRect } = require('./canvas-ui');
 const { drawTarget, drawFlower, drawKey, drawGate } = require('./board-symbols');
 
 function nearbyEnergy(state) {
@@ -247,11 +248,11 @@ function drawClearAnimation(ctx, layout, state) {
   const { boardX, boardY, cellSize } = layout;
   const gap = 2.5;
   const size = cellSize - gap * 2;
-  const shrink = progress * cellSize * 0.34;
+  const shrink = Math.max(0, progress - .3) * cellSize * .34;
   const radius = Math.max(3, cellSize * 0.12);
-  // 场景层已经把这些格子画成空格底色，这里只叠加收缩淡出的金块。
+  // 底色已在缓存中画好，只让本次消除格短暂亮起，再收缩淡出。
   ctx.globalAlpha = Math.max(0, 1 - progress);
-  ctx.fillStyle = COLORS.energy;
+  ctx.fillStyle = progress < .4 ? COLORS.clearGlow : COLORS.energy;
   for (let i = 0; i < cells.length; i += 1) {
     const x = boardX + cells[i][0] * cellSize + gap + shrink;
     const y = boardY + cells[i][1] * cellSize + gap + shrink;
@@ -317,7 +318,7 @@ function drawIceAnimation(ctx, layout, state) {
 }
 
 function drawDraggedShape(ctx, layout, state) {
-  dragPlacement.drawHeld(ctx, layout.cellSize, state.drag, COLORS.block);
+  if (!state.drag?.tapOrigin) dragPlacement.drawHeld(ctx, layout.cellSize, state.drag, COLORS.block);
 }
 
 function drawMechanicGuide(ctx,layout,state) {
@@ -356,6 +357,26 @@ function drawMechanicGuide(ctx,layout,state) {
   ctx.restore();
 }
 
+function getRotationAction(layout, state) {
+  if (!rotation.enabled(state)) return null;
+  return { x: layout.width - layout.horizontalPadding - 82, y: layout.energyY - 29, width: 82, height: 42 };
+}
+
+function drawRotation(ctx, layout, state) {
+  const action = getRotationAction(layout, state);
+  if (!action) return;
+  // Extend the touch target upward into the non-interactive board margin.
+  const rect = pressedRect(state, 'tool-rotate', { ...action, y: action.y + 11, height: action.height - 11 });
+  const selected = state.tray[state.rotationSlot];
+  const ready = !state.rotationUsed && selected && rotation.turn(selected) !== selected;
+  const subtitle = state.rotationUsed ? '本局已用' : !selected ? '先点选方块' : ready ? '剩余 1 次' : '形状不变';
+  ctx.fillStyle = ready ? COLORS.primaryButton : COLORS.panel;
+  roundedRect(ctx, rect.x, rect.y, rect.width, rect.height, 13);ctx.fill();
+  const color = ready ? COLORS.onPrimary : COLORS.secondaryText;
+  text(ctx, '旋转', rect.x + rect.width / 2, rect.y + 13, 13, color, 'center', '600');
+  text(ctx, subtitle, rect.x + rect.width / 2, rect.y + 25, 10, color);
+}
+
 function drawEnergy(ctx, layout, state) {
   if (state.challenge) {
     const next = challenges.nextTray(state.challenge);
@@ -373,21 +394,25 @@ function drawEnergy(ctx, layout, state) {
     if (!next.some(Boolean)) text(ctx, '本关最后一组', layout.width/2+24, layout.energyY+4, 11, COLORS.secondaryText);
     return;
   }
+  const rotationAction = getRotationAction(layout, state);
+  const center = rotationAction ? (layout.horizontalPadding + rotationAction.x - 8) / 2 : layout.width / 2;
   if (state.luckyPendingCount > 0) {
     ctx.textAlign = 'center';
     ctx.fillStyle = COLORS.secondaryText;
     ctx.font = '600 13px sans-serif';
     const queued = state.luckyPendingCount > 1 ? ` · 待领 ${state.luckyPendingCount} 个` : '';
-    ctx.fillText(`✦ 下一组获得幸运方块${queued}`, layout.width / 2, layout.energyY + 5);
+    const label = `✦ 下一组获得幸运方块${queued}`;
+    if (rotationAction) ctx.fillText(label, center, layout.energyY + 5, rotationAction.x - layout.horizontalPadding - 8);
+    else ctx.fillText(label, center, layout.energyY + 5);
     return;
   }
   ctx.textAlign = 'right';
   ctx.fillStyle = COLORS.secondaryText;
   ctx.font = '600 13px sans-serif';
-  ctx.fillText('✦ 能量', layout.width / 2 - 24, layout.energyY + 5);
+  ctx.fillText('✦ 能量', center - 24, layout.energyY + 5);
   ctx.textAlign = 'center';
   for (let i = 0; i < 3; i += 1) {
-    const cx = layout.width / 2 + i * 24 - 8;
+    const cx = center + i * 24 - 8;
     ctx.beginPath();
     if (i < state.energy) {
       ctx.arc(cx, layout.energyY, 6, 0, Math.PI * 2);
@@ -444,20 +469,25 @@ function drawTray(ctx, layout, state) {
   const entrance = state.trayAppearProgress == null ? 1 : state.trayAppearProgress;
   const scale = 0.72 + entrance * 0.28;
 
-  state.tray.forEach((shape, index) => {
+  state.tray.forEach((original, index) => {
+    const selected = original && state.rotationSlot === index && rotation.enabled(state) && !state.rotationUsed;
+    const preview = selected ? state.rotationPreview : null;
+    const shape = preview ? preview.shape : original;
+    const active = state.drag?.trayIndex === index;
+    const held = active && !state.drag.tapOrigin;
     // 空槽和拖起方块后仍保留底板；不改变原有命中范围。
-    ctx.fillStyle = state.drag && state.drag.trayIndex === index ? COLORS.traySelected : COLORS.trayBackground;
+    ctx.fillStyle = active || (selected && !state.drag) ? COLORS.traySelected : COLORS.trayBackground;
     roundedRect(ctx, layout.horizontalPadding + index * layout.traySlotWidth + 4,
       layout.trayY - layout.trayHitHalfHeight, layout.traySlotWidth - 8, layout.trayHitHalfHeight * 2, 16);
     ctx.fill();
-    if (!shape || (state.drag && state.drag.trayIndex === index)) return;
+    if (!shape || held) return;
     const centerX = layout.horizontalPadding + layout.traySlotWidth * (index + 0.5);
     const bounds = shapeBounds(shape);
     const scaledBlockSize = Math.min(blockSize * scale,
       (layout.traySlotWidth - 8) / bounds.width, 84 / bounds.height);
     const startX = centerX - bounds.width * scaledBlockSize / 2;
     const startY = layout.trayY - bounds.height * scaledBlockSize / 2;
-    const unavailable = Boolean(state.unavailableTray && state.unavailableTray[index]);
+    const unavailable = preview ? !preview.fits : Boolean(state.unavailableTray && state.unavailableTray[index]);
     const highlighted = shape.lucky && state.luckyHighlightUntil > 0;
 
     // 不可放置状态保持接近实色；透明度过低会与米灰背景混合成禁区灰。
@@ -497,6 +527,8 @@ module.exports = {
   drawDraggedShape,
   drawMechanicGuide,
   drawEnergy,
+  getRotationAction,
+  drawRotation,
   drawSuggestion,
   drawTray
  };

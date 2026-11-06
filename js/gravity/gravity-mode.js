@@ -3,7 +3,8 @@ const view = require('./gravity-view');
 const storage = require('../persistence/storage');
 const analytics = require('../platform/analytics');
 const dragPlacement = require('../views/drag-placement');
-const { hasAnyPlacement } = require('../rules/board');
+const clearFeedback = require('../views/clear-feedback');
+const { hasAnyPlacement, findCompletedRegions } = require('../rules/board');
 const KEY = 'fangcunGravityV1';
 const DEMO_MODE = 2; // One move demonstrates clearing, falling and a chain.
 const inside = (point, rect) => rect && point.x >= rect.x && point.x <= rect.x + rect.width
@@ -13,7 +14,8 @@ const inside = (point, rect) => rect && point.x >= rect.x && point.x <= rect.x +
 function create({ wx, invalidate, press, persist, feedback, leave, share }) {
   const model = {
     run: null, drag: null, animation: null, completed: [], best: 0, unavailableTray: [],
-    message: '', confirmRestart: false, rulesOpen: false, guideSeen: false, savePending: false, resultProgress: 1
+    message: '', confirmRestart: false, rulesOpen: false, guideSeen: false, savePending: false, resultProgress: 1,
+    clearFeedback: null
   };
   let resultStarted = null;
   let startingBest = 0; // Session-only feedback baseline; persisted records keep their existing timing.
@@ -52,6 +54,7 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
   }
 
   function hide() {
+    model.clearFeedback=null;
     resultStarted=null;model.resultProgress=1;
     cancel();
     if (model.animation) { model.animation = null; invalidate(); }
@@ -61,6 +64,7 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
   }
 
   function open(mode = 'free', reset = false) {
+    model.clearFeedback=null;
     resultStarted=null;model.resultProgress=1;
     cancel();
     model.animation = null;
@@ -107,7 +111,7 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
       invalidate();
     }
     const animation = model.animation;
-    if (!animation) return;
+    if (!animation) { stepClearFeedback(now); return; }
     while (animation.index < animation.frames.length) {
       const duration = animation.frames[animation.index].kind === 'clear' ? 160 : 240;
       if (now - animation.start < duration) {
@@ -116,6 +120,9 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
       }
       animation.start += duration;
       animation.index++;
+      if(animation.index<animation.frames.length && animation.frames[animation.index].kind==='clear') {
+        showClearFeedback(animation,animation.index);
+      }
     }
     if (animation.index === animation.frames.length) {
       model.animation = null;
@@ -124,7 +131,20 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
       animation.sounded = animation.index;
       if (feedback.elimination) feedback.elimination(animation.frames[animation.index].wave, false, 1);
     }
+    stepClearFeedback(now);
     invalidate();
+  }
+
+  function stepClearFeedback(now) {
+    if(!model.clearFeedback)return;
+    if(!clearFeedback.advance(model.clearFeedback,now))model.clearFeedback=null;
+    invalidate();
+  }
+
+  function showClearFeedback(animation,index) {
+    const item=animation.gains[index],wave=animation.frames[index].wave;
+    model.clearFeedback=clearFeedback.create(item.gain,item.count,wave,animation.start,`${wave} 连锁`);
+    model.clearFeedback.baseScore=animation.baseScore;
   }
 
   function updateDrag(point, layout) {
@@ -186,6 +206,7 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
           return;
         }
         model.run = restored;
+        model.clearFeedback = null;
         updateTrayAvailability();
         save();
         if (feedback.undoMove) feedback.undoMove();
@@ -226,15 +247,28 @@ function create({ wx, invalidate, press, persist, feedback, leave, share }) {
       return;
     }
     // Commit the stable board before animation; interrupted frames never replay rewards.
+    const oldScore=model.run.score,oldClears=model.run.clears;
     model.run = result.state;
     updateTrayAvailability();
     if (model.run.mode !== 'free' && model.run.won) model.guideSeen = true;
     save();
     model.message = '';
     if (result.frames.length) {
-      model.animation = { frames: result.frames, index: 0, start: Date.now(), progress: 0, sounded: 0 };
+      let gain=drag.shape.cells.length;
+      // Read the committed reward; do not duplicate the engine's points-per-region constant.
+      const pointsPerRegion=(model.run.score-oldScore-gain)/(model.run.clears-oldClears);
+      const gains=result.frames.map(frame=>{
+        if(frame.kind!=='clear')return null;
+        const regions=findCompletedRegions(frame.before),count=regions.rows.length+regions.cols.length+regions.palaces.length;
+        gain+=count*pointsPerRegion;
+        return {gain,count};
+      });
+      model.animation = { frames: result.frames, index: 0, start: Date.now(), progress: 0, sounded: 0,
+        gains, baseScore:model.run.score-gain };
+      showClearFeedback(model.animation,0);
       if (feedback.elimination) feedback.elimination(1, false, 1);
     } else {
+      model.clearFeedback=null;
       if (feedback.placement) feedback.placement();
       resultSound();
     }

@@ -1,5 +1,6 @@
 const { COLORS, MODES } = require('../config');
 const undoBudget = require('../rules/undo-budget');
+const rotation = require('../rules/rotation');
 const goals = require('../progression/goals');
 const { roundedRect, text, pressedRect, button, wrapText } = require('./canvas-ui');
 const { drawTarget, drawFlower, drawKey } = require('./board-symbols');
@@ -188,7 +189,7 @@ function drawHelp(ctx,layout,state) {
     '填满行、列或 3×3 九宫即可消除',
     '自由消除：冲高分，全放不下时结束',
     '目标闯关：限步达标，争取三星',
-    '方块不能旋转',
+    state.screen === 'menu' || rotation.enabled(state) ? '方庭每局可旋转一块方块' : '方块不能旋转',
     '消除、集星星，解锁庭院花木'
   ];
   let yy=y+66;

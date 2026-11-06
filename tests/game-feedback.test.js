@@ -77,7 +77,7 @@ for (const [score, expected] of [[90, '距离历史最佳还差 50 分'], [140, 
 run('state.bestScores.easy = 0; restartGame(); state.score = 8; state.gameOver = true; state.gameOverProgress = 1; renderScene(ctx, layout, state)');
 assert.ok(labels.includes('你的第一份纪录'));
 
-run('restartGame(); state.unavailableTray[0] = true');
+run('restartGame(); state.rotationUsed = true; state.unavailableTray[0] = true');
 const point = run('({clientX: layout.horizontalPadding + layout.traySlotWidth / 2, clientY: layout.trayY, identifier: 1})');
 handlers.start({ changedTouches: [point] });
 assert.strictEqual(run('state.feedback'), '暂时无处可放，先试试其他方块');
